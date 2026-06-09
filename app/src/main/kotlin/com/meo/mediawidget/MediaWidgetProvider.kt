@@ -14,14 +14,9 @@ import android.os.Bundle
 import android.util.SizeF
 import android.view.View
 import android.widget.RemoteViews
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MediaWidgetProvider : AppWidgetProvider() {
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override fun onUpdate(ctx: Context, manager: AppWidgetManager, ids: IntArray) {
         ids.forEach { id -> renderInto(ctx, manager, id) }
@@ -37,12 +32,8 @@ class MediaWidgetProvider : AppWidgetProvider() {
 
     override fun onDeleted(ctx: Context, ids: IntArray) {
         super.onDeleted(ctx, ids)
-        val pending = goAsync()
         val repo = SettingsRepo(ctx)
-        scope.launch {
-            try { ids.forEach { repo.clearWidget(it) } }
-            finally { pending.finish() }
-        }
+        runBlocking { ids.forEach { repo.clearWidget(it) } }
     }
 
     override fun onReceive(ctx: Context, intent: Intent) {
@@ -65,32 +56,19 @@ class MediaWidgetProvider : AppWidgetProvider() {
     }
 
     private fun renderInto(ctx: Context, manager: AppWidgetManager, id: Int) {
-        val pending = goAsync()
-        scope.launch {
-            try {
-                val config = SettingsRepo(ctx).resolve(id)
-                val controller = MediaState.pickActive(ctx, config.preferredApp)
+        val config = runBlocking { SettingsRepo(ctx).resolve(id) }
+        val controller = MediaState.pickActive(ctx, config.preferredApp)
 
-                val micro = build(ctx, Bucket.MICRO_BAR, config, controller)
-                val bar = build(ctx, Bucket.BAR, config, controller)
-                val mid = build(ctx, Bucket.MID_CARD, config, controller)
-                val wide = build(ctx, Bucket.WIDE, config, controller)
-                val mega = build(ctx, Bucket.MEGA, config, controller)
-
-                val rv = RemoteViews(mapOf(
-                    SizeF(210f, 70f) to micro,
-                    SizeF(290f, 70f) to bar,
-                    SizeF(370f, 70f) to bar,
-                    SizeF(370f, 210f) to mid,
-                    SizeF(210f, 290f) to wide,
-                    SizeF(290f, 290f) to wide,
-                    SizeF(370f, 290f) to mega
-                ))
-                manager.updateAppWidget(id, rv)
-            } finally {
-                pending.finish()
-            }
-        }
+        // Read actual widget size from options (set by launcher) and pick our
+        // bucket directly — SizeF-Map gaps caused smaller widgets to fall back
+        // to MICRO_BAR even when MID_CARD/WIDE was the right pick.
+        val opts = manager.getAppWidgetOptions(id)
+        val w = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 210).toFloat()
+        val h = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 70).toFloat()
+        val bucket = Bucket.pickForSize(SizeF(w, h))
+        android.util.Log.i("MediaWidget", "render id=$id w=${w}dp h=${h}dp → bucket=$bucket")
+        val rv = build(ctx, bucket, config, controller)
+        manager.updateAppWidget(id, rv)
     }
 
     private fun build(
