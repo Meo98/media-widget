@@ -91,7 +91,9 @@ class MediaWidgetProvider : AppWidgetProvider() {
             Bucket.MEGA -> R.layout.widget_mega
         }
         val rv = RemoteViews(ctx.packageName, layoutId)
+        val assets = StyleAssets.forStyle(config.style, ctx)
         bindContent(ctx, rv, bucket, controller)
+        applyStyle(ctx, rv, bucket, assets, controller)
         bindClicks(ctx, rv, bucket)
         return rv
     }
@@ -126,6 +128,47 @@ class MediaWidgetProvider : AppWidgetProvider() {
         // we guard with try-catch to be defensive across the bucket layouts that omit them.
         try { rv.setOnClickPendingIntent(R.id.btn_prev, transportIntent(ctx, ACTION_PREV)) } catch (_: Throwable) {}
         try { rv.setOnClickPendingIntent(R.id.btn_next, transportIntent(ctx, ACTION_NEXT)) } catch (_: Throwable) {}
+    }
+
+    private fun applyStyle(
+        ctx: Context, rv: RemoteViews, bucket: Bucket, assets: StyleAssets, controller: MediaController?
+    ) {
+        rv.setInt(R.id.container, "setBackgroundResource", assets.containerBg)
+        tryColor(rv, R.id.title, assets.textPrimary)
+        tryColor(rv, R.id.artist, assets.textSecondary)
+        tryTint(rv, R.id.btn_play_pause, assets.buttonTint)
+        tryTint(rv, R.id.btn_prev, assets.buttonTint)
+        tryTint(rv, R.id.btn_next, assets.buttonTint)
+        tryInt(rv, R.id.cover, "setBackgroundResource", assets.coverBg)
+
+        if (assets.useBlurredBackdrop && bucket == Bucket.MEGA) {
+            val art = controller?.metadata?.getBitmap(android.media.MediaMetadata.METADATA_KEY_ALBUM_ART)
+                ?: controller?.metadata?.getBitmap(android.media.MediaMetadata.METADATA_KEY_ART)
+            if (art != null) {
+                rv.setImageViewBitmap(R.id.backdrop, BlurHelper.blurForGlass(art, ctx))
+                rv.setViewVisibility(R.id.backdrop, View.VISIBLE)
+            } else {
+                rv.setViewVisibility(R.id.backdrop, View.GONE)
+            }
+        } else {
+            tryVisibility(rv, R.id.backdrop, View.GONE)
+        }
+    }
+
+    private fun tryColor(rv: RemoteViews, viewId: Int, color: Int) {
+        try { rv.setTextColor(viewId, color) } catch (_: Throwable) {}
+    }
+
+    private fun tryTint(rv: RemoteViews, viewId: Int, color: Int) {
+        try { rv.setInt(viewId, "setColorFilter", color) } catch (_: Throwable) {}
+    }
+
+    private fun tryInt(rv: RemoteViews, viewId: Int, method: String, value: Int) {
+        try { rv.setInt(viewId, method, value) } catch (_: Throwable) {}
+    }
+
+    private fun tryVisibility(rv: RemoteViews, viewId: Int, visibility: Int) {
+        try { rv.setViewVisibility(viewId, visibility) } catch (_: Throwable) {}
     }
 
     private fun transportIntent(ctx: Context, action: String): PendingIntent {
