@@ -17,6 +17,15 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ConfigureActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MediaWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+            </intent-filter>
+        </activity>
+
         <!-- Türöffner für MediaSessionManager.getActiveSessions(). Ohne
              aktiven NotificationListener verweigert das System Zugriff
              auf fremde Media-Sessions, selbst wenn wir den Listener gar

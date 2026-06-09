@@ -8,4 +8,5 @@
     android:initialLayout="@layout/widget_bar"
     android:previewLayout="@layout/widget_mega"
     android:resizeMode="horizontal|vertical"
-    android:widgetCategory="home_screen"/>
+    android:widgetCategory="home_screen"
+    android:configure="com.meo.mediawidget/.ConfigureActivity"/>
