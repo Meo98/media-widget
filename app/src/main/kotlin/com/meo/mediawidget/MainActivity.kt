@@ -14,6 +14,7 @@ import android.widget.TextView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -58,9 +59,14 @@ class MainActivity : Activity() {
         findViewById<Button>(R.id.btn_save_globals).setOnClickListener { saveGlobalDefaults() }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
+    }
+
     private fun renderGlobalDefaults() {
         scope.launch {
-            val config = withContext(Dispatchers.IO) { repo.resolve(-1) }
+            val config = withContext(Dispatchers.IO) { repo.readGlobalConfig() }
             findViewById<Spinner>(R.id.spinner_global_style)
                 .setSelection(Style.values().indexOf(config.style))
             findViewById<Spinner>(R.id.spinner_global_actions_mode)

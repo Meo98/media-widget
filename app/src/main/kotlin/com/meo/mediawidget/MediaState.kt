@@ -27,11 +27,12 @@ object MediaState {
 
     /**
      * Wählt den "interessantesten" Controller:
-     *   1. Einen mit PlaybackState == PLAYING (es läuft gerade was).
-     *   2. Sonst den ersten mit nicht-null Metadata (zuletzt aktiv).
-     *   3. Sonst null.
+     *   1. Wenn preferredPackage gesetzt: bevorzuge Controller mit passendem packageName.
+     *   2. Einen mit PlaybackState == PLAYING (es läuft gerade was).
+     *   3. Sonst den ersten mit nicht-null Metadata (zuletzt aktiv).
+     *   4. Sonst null.
      */
-    fun pickActive(context: Context): MediaController? {
+    fun pickActive(context: Context, preferredPackage: String? = null): MediaController? {
         if (!listenerEnabled(context)) return null
         val msm = context.getSystemService(Context.MEDIA_SESSION_SERVICE)
             as? MediaSessionManager ?: return null
@@ -41,6 +42,11 @@ object MediaState {
             msm.getActiveSessions(component)
         } catch (_: SecurityException) {
             return null
+        }
+
+        if (preferredPackage != null) {
+            val preferred = controllers.firstOrNull { it.packageName == preferredPackage }
+            if (preferred != null) return preferred
         }
 
         val playing = controllers.firstOrNull {

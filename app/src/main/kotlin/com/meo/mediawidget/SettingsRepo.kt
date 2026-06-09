@@ -33,6 +33,19 @@ class SettingsRepo(private val ctx: Context) {
         fun widgetAllPrefix(id: Int) = "w.$id."
     }
 
+    /** Returns global defaults without per-widget fallback (no widget id needed). */
+    suspend fun readGlobalConfig(): WidgetConfig {
+        val prefs = ctx.dataStore.data.first()
+        return WidgetConfig(
+            style = Style.valueOf(prefs[Keys.GLOBAL_STYLE] ?: Style.MATERIAL_YOU.name),
+            appActionsMode = AppActionsMode.valueOf(prefs[Keys.GLOBAL_ACTIONS_MODE] ?: AppActionsMode.AUTO.name),
+            appActionsAllowRaw = prefs[Keys.GLOBAL_ACTIONS_RAW] ?: true,
+            showProgressBar = prefs[Keys.GLOBAL_PROGRESS] ?: true,
+            openAppOnCoverTap = prefs[Keys.GLOBAL_COVER_TAP] ?: true,
+            preferredApp = prefs[Keys.GLOBAL_PREFERRED_APP]
+        )
+    }
+
     suspend fun resolve(widgetId: Int): WidgetConfig {
         val prefs = ctx.dataStore.data.first()
         return WidgetConfig(

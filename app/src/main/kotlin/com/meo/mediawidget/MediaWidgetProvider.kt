@@ -37,8 +37,12 @@ class MediaWidgetProvider : AppWidgetProvider() {
 
     override fun onDeleted(ctx: Context, ids: IntArray) {
         super.onDeleted(ctx, ids)
+        val pending = goAsync()
         val repo = SettingsRepo(ctx)
-        scope.launch { ids.forEach { repo.clearWidget(it) } }
+        scope.launch {
+            try { ids.forEach { repo.clearWidget(it) } }
+            finally { pending.finish() }
+        }
     }
 
     override fun onReceive(ctx: Context, intent: Intent) {
@@ -61,27 +65,31 @@ class MediaWidgetProvider : AppWidgetProvider() {
     }
 
     private fun renderInto(ctx: Context, manager: AppWidgetManager, id: Int) {
+        val pending = goAsync()
         scope.launch {
-            val config = SettingsRepo(ctx).resolve(id)
-            val controller = MediaState.pickActive(ctx)
+            try {
+                val config = SettingsRepo(ctx).resolve(id)
+                val controller = MediaState.pickActive(ctx, config.preferredApp)
 
-            val micro = build(ctx, Bucket.MICRO_BAR, config, controller)
-            val bar = build(ctx, Bucket.BAR, config, controller)
-            val mid = build(ctx, Bucket.MID_CARD, config, controller)
-            val wide = build(ctx, Bucket.WIDE, config, controller)
-            val mega = build(ctx, Bucket.MEGA, config, controller)
+                val micro = build(ctx, Bucket.MICRO_BAR, config, controller)
+                val bar = build(ctx, Bucket.BAR, config, controller)
+                val mid = build(ctx, Bucket.MID_CARD, config, controller)
+                val wide = build(ctx, Bucket.WIDE, config, controller)
+                val mega = build(ctx, Bucket.MEGA, config, controller)
 
-            val rv = RemoteViews(mapOf(
-                SizeF(210f, 70f) to micro,
-                SizeF(290f, 70f) to bar,
-                SizeF(370f, 70f) to bar,
-                SizeF(140f, 140f) to mid,
-                SizeF(370f, 210f) to mid,
-                SizeF(210f, 290f) to wide,
-                SizeF(290f, 290f) to wide,
-                SizeF(370f, 290f) to mega
-            ))
-            manager.updateAppWidget(id, rv)
+                val rv = RemoteViews(mapOf(
+                    SizeF(210f, 70f) to micro,
+                    SizeF(290f, 70f) to bar,
+                    SizeF(370f, 70f) to bar,
+                    SizeF(370f, 210f) to mid,
+                    SizeF(210f, 290f) to wide,
+                    SizeF(290f, 290f) to wide,
+                    SizeF(370f, 290f) to mega
+                ))
+                manager.updateAppWidget(id, rv)
+            } finally {
+                pending.finish()
+            }
         }
     }
 
@@ -97,14 +105,17 @@ class MediaWidgetProvider : AppWidgetProvider() {
         }
         val rv = RemoteViews(ctx.packageName, layoutId)
         val assets = StyleAssets.forStyle(config.style, ctx)
-        bindContent(ctx, rv, bucket, controller)
+        bindContent(ctx, rv, bucket, config, controller)
         applyStyle(ctx, rv, bucket, assets, controller)
         bindAppActions(ctx, rv, bucket, config, controller)
-        bindClicks(ctx, rv, bucket)
+        bindClicks(ctx, rv, bucket, config, controller)
         return rv
     }
 
-    private fun bindContent(ctx: Context, rv: RemoteViews, bucket: Bucket, controller: MediaController?) {
+    private fun bindContent(
+        ctx: Context, rv: RemoteViews, bucket: Bucket,
+        config: WidgetConfig, controller: MediaController?
+    ) {
         if (controller == null) {
             tryText(rv, R.id.title, ctx.getString(R.string.idle_title))
             tryText(rv, R.id.artist, ctx.getString(
@@ -113,6 +124,7 @@ class MediaWidgetProvider : AppWidgetProvider() {
             ))
             tryImageRes(rv, R.id.cover, R.drawable.ic_music)
             tryImageRes(rv, R.id.btn_play_pause, R.drawable.ic_play)
+            tryVisibility(rv, R.id.progress, View.GONE)
             return
         }
         val md = controller.metadata
@@ -126,14 +138,48 @@ class MediaWidgetProvider : AppWidgetProvider() {
 
         val playing = controller.playbackState?.state == PlaybackState.STATE_PLAYING
         tryImageRes(rv, R.id.btn_play_pause, if (playing) R.drawable.ic_pause else R.drawable.ic_play)
+
+        // Progress bar: only on MEGA bucket when enabled
+        if (bucket == Bucket.MEGA && config.showProgressBar) {
+            try {
+                val posMs = controller.playbackState?.position ?: 0L
+                val durMs = md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0L
+                // Scale to seconds to avoid Int overflow on tracks > 35 min
+                val posSec = (posMs / 1000L).coerceIn(0L, Int.MAX_VALUE.toLong()).toInt()
+                val durSec = (durMs / 1000L).coerceIn(1L, Int.MAX_VALUE.toLong()).toInt()
+                rv.setProgressBar(R.id.progress, durSec, posSec, false)
+                rv.setViewVisibility(R.id.progress, View.VISIBLE)
+            } catch (_: Throwable) {
+                tryVisibility(rv, R.id.progress, View.GONE)
+            }
+        } else {
+            tryVisibility(rv, R.id.progress, View.GONE)
+        }
     }
 
-    private fun bindClicks(ctx: Context, rv: RemoteViews, bucket: Bucket) {
+    private fun bindClicks(
+        ctx: Context, rv: RemoteViews, bucket: Bucket,
+        config: WidgetConfig, controller: MediaController?
+    ) {
         rv.setOnClickPendingIntent(R.id.btn_play_pause, transportIntent(ctx, ACTION_PLAY_PAUSE))
         // prev/next exist in BAR+. setOnClickPendingIntent on a missing id no-ops since API 26 but
         // we guard with try-catch to be defensive across the bucket layouts that omit them.
         try { rv.setOnClickPendingIntent(R.id.btn_prev, transportIntent(ctx, ACTION_PREV)) } catch (_: Throwable) {}
         try { rv.setOnClickPendingIntent(R.id.btn_next, transportIntent(ctx, ACTION_NEXT)) } catch (_: Throwable) {}
+
+        // Cover tap launches the source app when enabled
+        if (config.openAppOnCoverTap && controller != null) {
+            try {
+                val launchIntent = ctx.packageManager.getLaunchIntentForPackage(controller.packageName)
+                if (launchIntent != null) {
+                    val pi = PendingIntent.getActivity(
+                        ctx, controller.packageName.hashCode(), launchIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    rv.setOnClickPendingIntent(R.id.cover, pi)
+                }
+            } catch (_: Throwable) {}
+        }
     }
 
     private fun applyStyle(
