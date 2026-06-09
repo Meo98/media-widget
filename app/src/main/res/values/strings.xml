@@ -30,4 +30,12 @@
     <string name="inherit_global">Globalen Wert verwenden</string>
     <string name="cancel">Abbrechen</string>
     <string name="save">Speichern</string>
+
+    <string name="global_defaults">Globale Defaults</string>
+    <string name="placed_widgets">Platzierte Widgets</string>
+    <string name="no_widgets_placed">Keine Widgets platziert</string>
+    <string name="reconfigure">Konfigurieren</string>
+    <string name="reset">Reset</string>
+    <string name="permission_active">Benachrichtigungszugriff: aktiv</string>
+    <string name="permission_inactive">Benachrichtigungszugriff: nicht erteilt</string>
 </resources>
