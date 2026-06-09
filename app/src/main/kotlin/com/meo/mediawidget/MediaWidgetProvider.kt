@@ -43,14 +43,19 @@ class MediaWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(ctx: Context, intent: Intent) {
         super.onReceive(ctx, intent)
-        val controller = MediaState.pickActive(ctx)?.transportControls
+        val controller = MediaState.pickActive(ctx)
         when (intent.action) {
             ACTION_PLAY_PAUSE -> {
-                val state = MediaState.pickActive(ctx)?.playbackState?.state
-                if (state == PlaybackState.STATE_PLAYING) controller?.pause() else controller?.play()
+                val state = controller?.playbackState?.state
+                if (state == PlaybackState.STATE_PLAYING) controller?.transportControls?.pause()
+                else controller?.transportControls?.play()
             }
-            ACTION_NEXT -> controller?.skipToNext()
-            ACTION_PREV -> controller?.skipToPrevious()
+            ACTION_NEXT -> controller?.transportControls?.skipToNext()
+            ACTION_PREV -> controller?.transportControls?.skipToPrevious()
+            ACTION_CUSTOM -> {
+                val name = intent.getStringExtra(EXTRA_CUSTOM_ACTION_NAME) ?: return
+                controller?.transportControls?.sendCustomAction(name, null)
+            }
         }
         // No manual push — MediaSessionTracker fires via Callback after the action takes effect
     }
@@ -94,6 +99,7 @@ class MediaWidgetProvider : AppWidgetProvider() {
         val assets = StyleAssets.forStyle(config.style, ctx)
         bindContent(ctx, rv, bucket, controller)
         applyStyle(ctx, rv, bucket, assets, controller)
+        bindAppActions(ctx, rv, bucket, config, controller)
         bindClicks(ctx, rv, bucket)
         return rv
     }
@@ -171,6 +177,74 @@ class MediaWidgetProvider : AppWidgetProvider() {
         try { rv.setViewVisibility(viewId, visibility) } catch (_: Throwable) {}
     }
 
+    private fun bindAppActions(
+        ctx: Context, rv: RemoteViews, bucket: Bucket,
+        config: WidgetConfig, controller: MediaController?
+    ) {
+        val slotIds = listOf(R.id.action_slot_1, R.id.action_slot_2, R.id.action_slot_3, R.id.action_slot_4)
+        val maxSlots = when (bucket) {
+            Bucket.MEGA -> 4
+            Bucket.WIDE -> 2
+            Bucket.MID_CARD -> 2
+            else -> 0
+        }
+
+        if (config.appActionsMode == AppActionsMode.OFF || maxSlots == 0 || controller == null) {
+            tryVisibility(rv, R.id.actions_row, View.GONE)
+            slotIds.forEach { tryVisibility(rv, it, View.GONE) }
+            return
+        }
+
+        val raw = controller.playbackState?.customActions.orEmpty()
+        var slotIdx = 0
+        val pkg = controller.packageName
+
+        for (action in raw) {
+            if (slotIdx >= maxSlots) break
+            val polish = CuratedActions.polish(action.action.toString())
+            val iconRes: Int? = when {
+                polish != null -> polish.icon
+                config.appActionsMode == AppActionsMode.AUTO && config.appActionsAllowRaw ->
+                    null  // raw → use bitmap path below
+                else -> continue
+            }
+            val slotId = slotIds[slotIdx]
+            if (iconRes != null) {
+                tryImageRes(rv, slotId, iconRes)
+            } else {
+                val bmp = loadForeignIcon(ctx, pkg, action.icon) ?: continue
+                rv.setImageViewBitmap(slotId, bmp)
+            }
+            tryVisibility(rv, slotId, View.VISIBLE)
+            rv.setOnClickPendingIntent(slotId, customActionPendingIntent(ctx, action.action.toString()))
+            slotIdx++
+        }
+        // hide unused slots
+        for (i in slotIdx until slotIds.size) tryVisibility(rv, slotIds[i], View.GONE)
+        tryVisibility(rv, R.id.actions_row, if (slotIdx > 0) View.VISIBLE else View.GONE)
+    }
+
+    private fun loadForeignIcon(ctx: Context, pkg: String, iconRes: Int): Bitmap? = try {
+        val foreign = ctx.packageManager.getResourcesForApplication(pkg)
+        val drawable = foreign.getDrawable(iconRes, null) ?: return null
+        val size = (24 * ctx.resources.displayMetrics.density).toInt()
+        val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bmp)
+        drawable.setBounds(0, 0, size, size)
+        drawable.draw(canvas)
+        bmp
+    } catch (_: Throwable) { null }
+
+    private fun customActionPendingIntent(ctx: Context, actionName: String): PendingIntent {
+        val intent = Intent(ctx, MediaWidgetProvider::class.java)
+            .setAction(ACTION_CUSTOM)
+            .putExtra(EXTRA_CUSTOM_ACTION_NAME, actionName)
+        return PendingIntent.getBroadcast(
+            ctx, ("custom_" + actionName).hashCode(), intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
     private fun transportIntent(ctx: Context, action: String): PendingIntent {
         val intent = Intent(ctx, MediaWidgetProvider::class.java).setAction(action)
         return PendingIntent.getBroadcast(
@@ -192,6 +266,8 @@ class MediaWidgetProvider : AppWidgetProvider() {
         const val ACTION_PLAY_PAUSE = "com.meo.mediawidget.ACTION_PLAY_PAUSE"
         const val ACTION_NEXT = "com.meo.mediawidget.ACTION_NEXT"
         const val ACTION_PREV = "com.meo.mediawidget.ACTION_PREV"
+        const val ACTION_CUSTOM = "com.meo.mediawidget.ACTION_CUSTOM"
+        const val EXTRA_CUSTOM_ACTION_NAME = "custom_action_name"
 
         fun requestUpdate(ctx: Context) {
             val intent = Intent(ctx, MediaWidgetProvider::class.java).apply {
