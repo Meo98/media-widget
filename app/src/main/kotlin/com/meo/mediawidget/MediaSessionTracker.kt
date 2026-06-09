@@ -1,10 +1,10 @@
 package com.meo.mediawidget
 
-import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.media.MediaMetadata
 import android.media.session.MediaController
+import android.media.session.MediaSession
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.os.Handler
@@ -14,14 +14,13 @@ object MediaSessionTracker {
 
     private var appContext: Context? = null
     private var sessionsListener: MediaSessionManager.OnActiveSessionsChangedListener? = null
-    private val controllerCallbacks = mutableMapOf<MediaController, MediaController.Callback>()
+    private val controllerCallbacks = mutableMapOf<MediaSession.Token, Pair<MediaController, MediaController.Callback>>()
     private val mainHandler = Handler(Looper.getMainLooper())
     private val pushUpdate = Runnable { reallyPushUpdate() }
 
     fun start(ctx: Context) {
         if (appContext != null) return  // already started
         val app = ctx.applicationContext
-        appContext = app
 
         val msm = app.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
         val component = ComponentName(app, NotifListener::class.java)
@@ -30,15 +29,21 @@ object MediaSessionTracker {
             rebind(controllers ?: emptyList())
             scheduleUpdate()
         }
-        sessionsListener = listener
 
-        try {
-            msm.addOnActiveSessionsChangedListener(listener, component)
-            rebind(msm.getActiveSessions(component))
-            scheduleUpdate()
+        // Set up registration first; only commit state on full success so a
+        // SecurityException doesn't leak the listener or block future start() calls.
+        val initialControllers = try {
+            msm.addOnActiveSessionsChangedListener(listener, component, mainHandler)
+            msm.getActiveSessions(component)
         } catch (_: SecurityException) {
-            // permission not granted yet; will retry when onListenerConnected fires again
+            try { msm.removeOnActiveSessionsChangedListener(listener) } catch (_: Throwable) {}
+            return
         }
+
+        appContext = app
+        sessionsListener = listener
+        rebind(initialControllers)
+        scheduleUpdate()
     }
 
     fun stop() {
@@ -47,7 +52,7 @@ object MediaSessionTracker {
         sessionsListener?.let { msm?.removeOnActiveSessionsChangedListener(it) }
         sessionsListener = null
 
-        controllerCallbacks.forEach { (controller, cb) -> controller.unregisterCallback(cb) }
+        controllerCallbacks.values.forEach { (controller, cb) -> controller.unregisterCallback(cb) }
         controllerCallbacks.clear()
 
         mainHandler.removeCallbacks(pushUpdate)
@@ -55,20 +60,23 @@ object MediaSessionTracker {
     }
 
     private fun rebind(controllers: List<MediaController>) {
-        // unsubscribe controllers no longer active
-        val stale = controllerCallbacks.keys.filterNot { c -> controllers.any { it == c } }
-        stale.forEach { c ->
-            controllerCallbacks.remove(c)?.let { c.unregisterCallback(it) }
+        val incomingTokens = controllers.map { it.sessionToken }.toSet()
+
+        // unsubscribe controllers whose session token is no longer active
+        val staleTokens = controllerCallbacks.keys.filterNot { it in incomingTokens }
+        staleTokens.forEach { token ->
+            controllerCallbacks.remove(token)?.let { (controller, cb) -> controller.unregisterCallback(cb) }
         }
-        // subscribe new controllers
-        controllers.filterNot { it in controllerCallbacks }.forEach { controller ->
+
+        // subscribe controllers whose session token isn't yet tracked
+        controllers.filterNot { it.sessionToken in controllerCallbacks }.forEach { controller ->
             val cb = object : MediaController.Callback() {
                 override fun onPlaybackStateChanged(state: PlaybackState?) = scheduleUpdate()
                 override fun onMetadataChanged(metadata: MediaMetadata?) = scheduleUpdate()
                 override fun onSessionDestroyed() = scheduleUpdate()
             }
-            controller.registerCallback(cb)
-            controllerCallbacks[controller] = cb
+            controller.registerCallback(cb, mainHandler)
+            controllerCallbacks[controller.sessionToken] = controller to cb
         }
     }
 
