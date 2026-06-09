@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical"
+    android:background="@drawable/widget_background">
+
+    <ImageView
+        android:id="@+id/cover"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="centerCrop"
+        android:background="@drawable/widget_cover_background"
+        android:src="@drawable/ic_music"
+        android:contentDescription="@string/cover_desc"/>
+
+    <ImageButton
+        android:id="@+id/btn_play_pause"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_play"
+        android:contentDescription="@string/play_pause_desc"/>
+</LinearLayout>

@@ -16,4 +16,6 @@
 
     <string name="permission_explain">Damit das Widget die aktuelle Wiedergabe einer beliebigen App (Tidal, Spotify, YouTube Music …) lesen und steuern kann, brauche ich Zugriff auf die Mitteilungszentrale. Tippe unten auf den Knopf und aktiviere „Media Widget Listener" in der Liste.</string>
     <string name="open_settings">Berechtigung erteilen</string>
+
+    <string name="action_slot_desc">App-Aktion</string>
 </resources>
