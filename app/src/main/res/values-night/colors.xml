@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dark theme: heller Text auf dunklem Surface -->
-    <color name="widget_text_primary">@android:color/system_neutral1_50</color>
-    <color name="widget_text_secondary">@android:color/system_neutral2_200</color>
+    <color name="widget_text_primary">@color/material_text_primary</color>
+    <color name="widget_text_secondary">@color/material_text_secondary</color>
     <color name="widget_surface">@android:color/system_accent2_800</color>
     <color name="widget_cover_bg">@android:color/system_accent1_700</color>
+
+    <color name="material_text_primary">@android:color/system_neutral1_50</color>
+    <color name="material_text_secondary">@android:color/system_neutral2_200</color>
+    <color name="material_button_tint">@android:color/system_accent1_300</color>
+    <color name="material_surface">@android:color/system_accent2_800</color>
+    <color name="material_cover_bg">@android:color/system_accent1_700</color>
 </resources>
