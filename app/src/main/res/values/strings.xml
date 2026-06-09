@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Media Widget</string>
+    <string name="listener_label">Media Widget Listener</string>
+
+    <string name="idle_title">Keine Wiedergabe</string>
+    <string name="idle_artist">– kein aktives Medium –</string>
+    <string name="need_permission">Tippe in der App auf „Berechtigung erteilen"</string>
+    <string name="unknown_title">Unbekannter Titel</string>
+    <string name="unknown_artist">Unbekannter Interpret</string>
+
+    <string name="cover_desc">Albumcover</string>
+    <string name="play_pause_desc">Wiedergabe / Pause</string>
+    <string name="next_desc">Nächster Titel</string>
+    <string name="prev_desc">Vorheriger Titel</string>
+
+    <string name="permission_explain">Damit das Widget die aktuelle Wiedergabe einer beliebigen App (Tidal, Spotify, YouTube Music …) lesen und steuern kann, brauche ich Zugriff auf die Mitteilungszentrale. Tippe unten auf den Knopf und aktiviere „Media Widget Listener" in der Liste.</string>
+    <string name="open_settings">Berechtigung erteilen</string>
+</resources>

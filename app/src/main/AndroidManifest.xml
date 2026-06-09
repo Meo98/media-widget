@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.MediaWidget"
+        android:allowBackup="false">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MediaWidget">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- Türöffner für MediaSessionManager.getActiveSessions(). Ohne
+             aktiven NotificationListener verweigert das System Zugriff
+             auf fremde Media-Sessions, selbst wenn wir den Listener gar
+             nicht für Notifications nutzen. -->
+        <service
+            android:name=".NotifListener"
+            android:label="@string/listener_label"
+            android:exported="true"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService"/>
+            </intent-filter>
+        </service>
+
+        <!-- Widget-Provider: reagiert auf System-Lebenszyklus (Enabled,
+             Update, Deleted) und auf unsere internen Klick-Actions. -->
+        <receiver
+            android:name=".MediaWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="com.meo.mediawidget.ACTION_PLAY_PAUSE"/>
+                <action android:name="com.meo.mediawidget.ACTION_NEXT"/>
+                <action android:name="com.meo.mediawidget.ACTION_PREV"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/media_widget_info"/>
+        </receiver>
+
+    </application>
+</manifest>
