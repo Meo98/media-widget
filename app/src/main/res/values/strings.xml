@@ -18,4 +18,16 @@
     <string name="open_settings">Berechtigung erteilen</string>
 
     <string name="action_slot_desc">App-Aktion</string>
+
+    <string name="configure_title">Widget konfigurieren</string>
+    <string name="use_global_defaults">Globale Defaults verwenden</string>
+    <string name="customize">Oder individuell anpassen</string>
+    <string name="setting_style">Style</string>
+    <string name="setting_actions_mode">App-Actions Modus</string>
+    <string name="setting_allow_raw">Unbekannte App-Actions erlauben (Auto-Modus)</string>
+    <string name="setting_progress">Progress-Bar anzeigen (nur MEGA)</string>
+    <string name="setting_cover_tap">Cover-Tap öffnet App</string>
+    <string name="inherit_global">Globalen Wert verwenden</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="save">Speichern</string>
 </resources>
