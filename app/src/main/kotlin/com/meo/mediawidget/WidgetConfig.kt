@@ -10,7 +10,9 @@ data class WidgetConfig(
     val appActionsAllowRaw: Boolean = true,
     val showProgressBar: Boolean = true,
     val openAppOnCoverTap: Boolean = true,
-    val preferredApp: String? = null
+    val preferredApp: String? = null,
+    /** User-selected source-app package (per widget). Null = auto (most-active session). */
+    val selectedAppPackage: String? = null
 ) {
     companion object {
         val DEFAULT = WidgetConfig()

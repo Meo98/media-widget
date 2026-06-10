@@ -18,6 +18,23 @@
     <string name="open_settings">Berechtigung erteilen</string>
 
     <string name="action_slot_desc">App-Aktion</string>
+    <string name="app_switcher_desc">Zu dieser App wechseln</string>
+    <string name="app_tagline">Media-Steuerung für deinen Homescreen</string>
+    <string name="global_defaults_subtitle">Werden für neue und INHERIT-Widgets verwendet</string>
+    <string name="placed_widgets_subtitle">Tippe auf Konfigurieren, um Widget-spezifische Einstellungen zu ändern</string>
+    <string name="widget_label_fmt">Widget #%1$d</string>
+
+    <!-- Setting help / descriptions -->
+    <string name="setting_style_help">Material You = tonal aus Wallpaper · Glass = blurred Backdrop · AMOLED = pures Schwarz</string>
+    <string name="setting_actions_mode_help">Auto = polished Like/Thumbs + raw fallback · Polished only = nur erkannte · Off = Row aus</string>
+    <string name="setting_allow_raw_help">Im Auto-Modus: zeigt auch unbekannte App-Actions mit deren Original-Icon</string>
+    <string name="setting_progress_help">Track-Position als Balken unten in der 4x5-Variante</string>
+    <string name="setting_cover_tap_help">Tipp auf das Album-Cover öffnet die spielende App im Vordergrund</string>
+
+    <string name="configure_subtitle">Pro Widget eigene Einstellungen oder globale Defaults</string>
+    <string name="use_global_defaults_help">Lass alles auf den globalen Werten (passt sich automatisch an, wenn du dort später was änderst)</string>
+    <string name="use_global_apply">Übernehmen</string>
+    <string name="customize_subtitle">Für jede Einstellung kannst du sie individuell setzen oder mit „Globalen Wert verwenden" auf den Default zurückfallen</string>
 
     <string name="configure_title">Widget konfigurieren</string>
     <string name="use_global_defaults">Globale Defaults verwenden</string>

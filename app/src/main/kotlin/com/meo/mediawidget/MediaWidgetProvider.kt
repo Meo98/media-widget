@@ -38,7 +38,27 @@ class MediaWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(ctx: Context, intent: Intent) {
         super.onReceive(ctx, intent)
-        val controller = MediaState.pickActive(ctx)
+
+        // ACTION_SWITCH_APP handled per-widget; resolve its controller before the rest.
+        if (intent.action == ACTION_SWITCH_APP) {
+            val pkg = intent.getStringExtra(EXTRA_SWITCH_APP_PACKAGE) ?: return
+            val id = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+            if (id != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                runBlocking { SettingsRepo(ctx).writeWidgetSelectedApp(id, pkg) }
+                requestUpdate(ctx)
+            }
+            return
+        }
+
+        // Route transport buttons to the widget's currently-selected app, not the
+        // most-recently-active session globally. Widget id is carried in the
+        // PendingIntent extras so we know which widget's selection to use.
+        val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+        val selectedPkg = if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            runBlocking { SettingsRepo(ctx).resolve(widgetId).selectedAppPackage }
+        } else null
+        val controller = MediaState.pickActive(ctx, selectedPkg)
+
         when (intent.action) {
             ACTION_PLAY_PAUSE -> {
                 val state = controller?.playbackState?.state
@@ -57,7 +77,11 @@ class MediaWidgetProvider : AppWidgetProvider() {
 
     private fun renderInto(ctx: Context, manager: AppWidgetManager, id: Int) {
         val config = runBlocking { SettingsRepo(ctx).resolve(id) }
-        val controller = MediaState.pickActive(ctx, config.preferredApp)
+        // selectedAppPackage (user-picked via switcher) > preferredApp (global default) > auto
+        val sessions = MediaState.listActiveSessions(ctx)
+        val preferredPkg = config.selectedAppPackage ?: config.preferredApp
+        val controller = preferredPkg?.let { pkg -> sessions.firstOrNull { it.packageName == pkg } }
+            ?: MediaState.pickActive(ctx, null)
 
         // Read actual widget size from options (set by launcher) and pick our
         // bucket directly — SizeF-Map gaps caused smaller widgets to fall back
@@ -67,12 +91,13 @@ class MediaWidgetProvider : AppWidgetProvider() {
         val h = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 70).toFloat()
         val bucket = Bucket.pickForSize(SizeF(w, h))
         android.util.Log.i("MediaWidget", "render id=$id w=${w}dp h=${h}dp → bucket=$bucket")
-        val rv = build(ctx, bucket, config, controller)
+        val rv = build(ctx, bucket, config, controller, sessions, id)
         manager.updateAppWidget(id, rv)
     }
 
     private fun build(
-        ctx: Context, bucket: Bucket, config: WidgetConfig, controller: MediaController?
+        ctx: Context, bucket: Bucket, config: WidgetConfig, controller: MediaController?,
+        sessions: List<MediaController> = emptyList(), widgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID
     ): RemoteViews {
         val layoutId = when (bucket) {
             Bucket.MICRO_BAR -> R.layout.widget_microbar
@@ -85,8 +110,9 @@ class MediaWidgetProvider : AppWidgetProvider() {
         val assets = StyleAssets.forStyle(config.style, ctx)
         bindContent(ctx, rv, bucket, config, controller)
         applyStyle(ctx, rv, bucket, assets, controller)
-        bindAppActions(ctx, rv, bucket, config, controller)
-        bindClicks(ctx, rv, bucket, config, controller)
+        bindAppActions(ctx, rv, bucket, config, controller, widgetId)
+        bindAppSwitchers(ctx, rv, bucket, controller, sessions, widgetId)
+        bindClicks(ctx, rv, bucket, config, controller, widgetId)
         return rv
     }
 
@@ -137,13 +163,13 @@ class MediaWidgetProvider : AppWidgetProvider() {
 
     private fun bindClicks(
         ctx: Context, rv: RemoteViews, bucket: Bucket,
-        config: WidgetConfig, controller: MediaController?
+        config: WidgetConfig, controller: MediaController?, widgetId: Int
     ) {
-        rv.setOnClickPendingIntent(R.id.btn_play_pause, transportIntent(ctx, ACTION_PLAY_PAUSE))
+        rv.setOnClickPendingIntent(R.id.btn_play_pause, transportIntent(ctx, ACTION_PLAY_PAUSE, widgetId))
         // prev/next exist in BAR+. setOnClickPendingIntent on a missing id no-ops since API 26 but
         // we guard with try-catch to be defensive across the bucket layouts that omit them.
-        try { rv.setOnClickPendingIntent(R.id.btn_prev, transportIntent(ctx, ACTION_PREV)) } catch (_: Throwable) {}
-        try { rv.setOnClickPendingIntent(R.id.btn_next, transportIntent(ctx, ACTION_NEXT)) } catch (_: Throwable) {}
+        try { rv.setOnClickPendingIntent(R.id.btn_prev, transportIntent(ctx, ACTION_PREV, widgetId)) } catch (_: Throwable) {}
+        try { rv.setOnClickPendingIntent(R.id.btn_next, transportIntent(ctx, ACTION_NEXT, widgetId)) } catch (_: Throwable) {}
 
         // Cover tap launches the source app when enabled
         if (config.openAppOnCoverTap && controller != null) {
@@ -151,7 +177,7 @@ class MediaWidgetProvider : AppWidgetProvider() {
                 val launchIntent = ctx.packageManager.getLaunchIntentForPackage(controller.packageName)
                 if (launchIntent != null) {
                     val pi = PendingIntent.getActivity(
-                        ctx, controller.packageName.hashCode(), launchIntent,
+                        ctx, ("cover_${widgetId}_${controller.packageName}").hashCode(), launchIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
                     rv.setOnClickPendingIntent(R.id.cover, pi)
@@ -203,13 +229,14 @@ class MediaWidgetProvider : AppWidgetProvider() {
 
     private fun bindAppActions(
         ctx: Context, rv: RemoteViews, bucket: Bucket,
-        config: WidgetConfig, controller: MediaController?
+        config: WidgetConfig, controller: MediaController?, widgetId: Int
     ) {
         val slotIds = listOf(R.id.action_slot_1, R.id.action_slot_2, R.id.action_slot_3, R.id.action_slot_4)
         val maxSlots = when (bucket) {
             Bucket.MEGA -> 4
             Bucket.WIDE -> 2
             Bucket.MID_CARD -> 2
+            Bucket.BAR -> 1
             else -> 0
         }
 
@@ -240,12 +267,68 @@ class MediaWidgetProvider : AppWidgetProvider() {
                 rv.setImageViewBitmap(slotId, bmp)
             }
             tryVisibility(rv, slotId, View.VISIBLE)
-            rv.setOnClickPendingIntent(slotId, customActionPendingIntent(ctx, action.action.toString()))
+            rv.setOnClickPendingIntent(slotId, customActionPendingIntent(ctx, action.action.toString(), widgetId))
             slotIdx++
         }
         // hide unused slots
         for (i in slotIdx until slotIds.size) tryVisibility(rv, slotIds[i], View.GONE)
         tryVisibility(rv, R.id.actions_row, if (slotIdx > 0) View.VISIBLE else View.GONE)
+    }
+
+    private fun bindAppSwitchers(
+        ctx: Context, rv: RemoteViews, bucket: Bucket,
+        currentController: MediaController?,
+        sessions: List<MediaController>, widgetId: Int
+    ) {
+        val slotIds = listOf(R.id.app_switcher_1, R.id.app_switcher_2, R.id.app_switcher_3)
+        // MICRO_BAR has no room for switchers
+        if (bucket == Bucket.MICRO_BAR || sessions.isEmpty()) {
+            tryVisibility(rv, R.id.app_switcher_row, View.GONE)
+            slotIds.forEach { tryVisibility(rv, it, View.GONE) }
+            return
+        }
+
+        val currentPkg = currentController?.packageName
+        val visible = sessions.take(slotIds.size)
+        visible.forEachIndexed { idx, controller ->
+            val slotId = slotIds[idx]
+            val icon = loadAppIcon(ctx, controller.packageName)
+            if (icon != null) {
+                rv.setImageViewBitmap(slotId, icon)
+                tryVisibility(rv, slotId, View.VISIBLE)
+                rv.setOnClickPendingIntent(slotId, switchAppPendingIntent(ctx, controller.packageName, widgetId))
+                // Active app indicator: alpha 255, inactive: alpha ~140 (visually smaller weight)
+                try {
+                    rv.setInt(slotId, "setImageAlpha", if (controller.packageName == currentPkg) 255 else 140)
+                } catch (_: Throwable) {}
+            } else {
+                tryVisibility(rv, slotId, View.GONE)
+            }
+        }
+        // hide unused slots
+        for (i in visible.size until slotIds.size) tryVisibility(rv, slotIds[i], View.GONE)
+        tryVisibility(rv, R.id.app_switcher_row, View.VISIBLE)
+    }
+
+    private fun loadAppIcon(ctx: Context, pkg: String): Bitmap? = try {
+        val drawable = ctx.packageManager.getApplicationIcon(pkg)
+        val size = (28 * ctx.resources.displayMetrics.density).toInt()
+        val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bmp)
+        drawable.setBounds(0, 0, size, size)
+        drawable.draw(canvas)
+        bmp
+    } catch (_: Throwable) { null }
+
+    private fun switchAppPendingIntent(ctx: Context, pkg: String, widgetId: Int): PendingIntent {
+        val intent = Intent(ctx, MediaWidgetProvider::class.java)
+            .setAction(ACTION_SWITCH_APP)
+            .putExtra(EXTRA_SWITCH_APP_PACKAGE, pkg)
+            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+        return PendingIntent.getBroadcast(
+            ctx, ("switch_${widgetId}_$pkg").hashCode(), intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     private fun loadForeignIcon(ctx: Context, pkg: String, iconRes: Int): Bitmap? = try {
@@ -259,20 +342,23 @@ class MediaWidgetProvider : AppWidgetProvider() {
         bmp
     } catch (_: Throwable) { null }
 
-    private fun customActionPendingIntent(ctx: Context, actionName: String): PendingIntent {
+    private fun customActionPendingIntent(ctx: Context, actionName: String, widgetId: Int): PendingIntent {
         val intent = Intent(ctx, MediaWidgetProvider::class.java)
             .setAction(ACTION_CUSTOM)
             .putExtra(EXTRA_CUSTOM_ACTION_NAME, actionName)
+            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
         return PendingIntent.getBroadcast(
-            ctx, ("custom_" + actionName).hashCode(), intent,
+            ctx, ("custom_${widgetId}_$actionName").hashCode(), intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
 
-    private fun transportIntent(ctx: Context, action: String): PendingIntent {
-        val intent = Intent(ctx, MediaWidgetProvider::class.java).setAction(action)
+    private fun transportIntent(ctx: Context, action: String, widgetId: Int): PendingIntent {
+        val intent = Intent(ctx, MediaWidgetProvider::class.java)
+            .setAction(action)
+            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
         return PendingIntent.getBroadcast(
-            ctx, action.hashCode(), intent,
+            ctx, ("${action}_$widgetId").hashCode(), intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
@@ -292,6 +378,8 @@ class MediaWidgetProvider : AppWidgetProvider() {
         const val ACTION_PREV = "com.meo.mediawidget.ACTION_PREV"
         const val ACTION_CUSTOM = "com.meo.mediawidget.ACTION_CUSTOM"
         const val EXTRA_CUSTOM_ACTION_NAME = "custom_action_name"
+        const val ACTION_SWITCH_APP = "com.meo.mediawidget.ACTION_SWITCH_APP"
+        const val EXTRA_SWITCH_APP_PACKAGE = "switch_app_package"
 
         fun requestUpdate(ctx: Context) {
             val intent = Intent(ctx, MediaWidgetProvider::class.java).apply {

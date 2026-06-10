@@ -15,7 +15,7 @@
         <item name="colorOutline">@color/md3_outline</item>
         <item name="android:colorBackground">@color/md3_background</item>
         <item name="android:statusBarColor">@color/md3_background</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
         <item name="android:navigationBarColor">@color/md3_background</item>
     </style>
 

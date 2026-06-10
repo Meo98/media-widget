@@ -22,4 +22,23 @@
     <color name="amoled_button_tint">#FFFFFFFF</color>
     <color name="amoled_surface">#FF000000</color>
     <color name="amoled_cover_bg">#FF101010</color>
+
+    <!-- Material 3 app-UI colors (light theme), derived from system Material You palette -->
+    <color name="md3_primary">@android:color/system_accent1_600</color>
+    <color name="md3_on_primary">@android:color/system_accent1_0</color>
+    <color name="md3_primary_container">@android:color/system_accent1_100</color>
+    <color name="md3_on_primary_container">@android:color/system_accent1_900</color>
+    <color name="md3_secondary">@android:color/system_accent2_600</color>
+    <color name="md3_on_secondary">@android:color/system_accent2_0</color>
+    <color name="md3_secondary_container">@android:color/system_accent2_100</color>
+    <color name="md3_background">@android:color/system_neutral1_50</color>
+    <color name="md3_surface">@android:color/system_neutral1_50</color>
+    <color name="md3_on_surface">@android:color/system_neutral1_900</color>
+    <color name="md3_surface_variant">@android:color/system_neutral2_100</color>
+    <color name="md3_on_surface_variant">@android:color/system_neutral2_700</color>
+    <color name="md3_outline">@android:color/system_neutral2_500</color>
+    <color name="md3_success">#FF15803D</color>
+    <color name="md3_success_container">#FFD1FAE5</color>
+    <color name="md3_error">#FFB91C1C</color>
+    <color name="md3_error_container">#FFFEE2E2</color>
 </resources>

@@ -1,13 +1,14 @@
 package com.meo.mediawidget
 
-import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.CheckBox
 import android.widget.Spinner
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.materialswitch.MaterialSwitch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,7 +16,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ConfigureActivity : Activity() {
+class ConfigureActivity : AppCompatActivity() {
 
     private var widgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -60,30 +61,30 @@ class ConfigureActivity : Activity() {
             val config = withContext(Dispatchers.IO) { repo.resolve(widgetId) }
             spinnerStyle.setSelection(Style.values().indexOf(config.style))
             spinnerMode.setSelection(AppActionsMode.values().indexOf(config.appActionsMode))
-            findViewById<CheckBox>(R.id.check_allow_raw).isChecked = config.appActionsAllowRaw
-            findViewById<CheckBox>(R.id.check_progress).isChecked = config.showProgressBar
-            findViewById<CheckBox>(R.id.check_cover_tap).isChecked = config.openAppOnCoverTap
+            findViewById<MaterialSwitch>(R.id.check_allow_raw).isChecked = config.appActionsAllowRaw
+            findViewById<MaterialSwitch>(R.id.check_progress).isChecked = config.showProgressBar
+            findViewById<MaterialSwitch>(R.id.check_cover_tap).isChecked = config.openAppOnCoverTap
             // All "inherit" checkboxes default OFF — user can re-enable to inherit globals
         }
 
-        findViewById<Button>(R.id.btn_use_global).setOnClickListener {
+        findViewById<MaterialButton>(R.id.btn_use_global).setOnClickListener {
             scope.launch {
                 withContext(Dispatchers.IO) { repo.clearWidget(widgetId) }
                 finishWithResult()
             }
         }
 
-        findViewById<Button>(R.id.btn_save).setOnClickListener {
+        findViewById<MaterialButton>(R.id.btn_save).setOnClickListener {
             val style = if (findViewById<CheckBox>(R.id.check_inherit_style).isChecked) null
                 else Style.values()[spinnerStyle.selectedItemPosition]
             val mode = if (findViewById<CheckBox>(R.id.check_inherit_actions_mode).isChecked) null
                 else AppActionsMode.values()[spinnerMode.selectedItemPosition]
             val raw = if (findViewById<CheckBox>(R.id.check_inherit_allow_raw).isChecked) null
-                else findViewById<CheckBox>(R.id.check_allow_raw).isChecked
+                else findViewById<MaterialSwitch>(R.id.check_allow_raw).isChecked
             val progress = if (findViewById<CheckBox>(R.id.check_inherit_progress).isChecked) null
-                else findViewById<CheckBox>(R.id.check_progress).isChecked
+                else findViewById<MaterialSwitch>(R.id.check_progress).isChecked
             val cover = if (findViewById<CheckBox>(R.id.check_inherit_cover_tap).isChecked) null
-                else findViewById<CheckBox>(R.id.check_cover_tap).isChecked
+                else findViewById<MaterialSwitch>(R.id.check_cover_tap).isChecked
 
             scope.launch {
                 withContext(Dispatchers.IO) {
@@ -97,7 +98,7 @@ class ConfigureActivity : Activity() {
             }
         }
 
-        findViewById<Button>(R.id.btn_cancel).setOnClickListener { finish() }
+        findViewById<MaterialButton>(R.id.btn_cancel).setOnClickListener { finish() }
     }
 
     private fun finishWithResult() {

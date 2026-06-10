@@ -56,4 +56,38 @@ object MediaState {
 
         return controllers.firstOrNull { it.metadata != null }
     }
+
+    /**
+     * Liste der aktuell aktiven Media-Sessions, sortiert nach Relevanz:
+     * Playing zuerst, dann mit Metadata, dann andere. Pro Package nur 1
+     * Eintrag (verschiedene Sessions derselben App werden dedupliziert).
+     *
+     * Wir lassen auch Sessions ohne PlaybackState durch (z.B. KDE-Connect
+     * MPRIS proxy hat oft state == null bis die remote App spielt) — sonst
+     * verschwinden sie aus dem Switcher obwohl sie aktiv sind.
+     */
+    fun listActiveSessions(context: Context): List<MediaController> {
+        if (!listenerEnabled(context)) return emptyList()
+        val msm = context.getSystemService(Context.MEDIA_SESSION_SERVICE)
+            as? MediaSessionManager ?: return emptyList()
+        val component = ComponentName(context, NotifListener::class.java)
+
+        val controllers = try {
+            msm.getActiveSessions(component)
+        } catch (_: SecurityException) {
+            return emptyList()
+        }
+
+        // Sort: playing > has-metadata > others. Dedupe by package.
+        val sorted = controllers.sortedWith(compareByDescending<MediaController> { c ->
+            when {
+                c.playbackState?.state == PlaybackState.STATE_PLAYING -> 3
+                c.playbackState?.state == PlaybackState.STATE_PAUSED -> 2
+                c.metadata != null -> 1
+                else -> 0
+            }
+        })
+        val seen = mutableSetOf<String>()
+        return sorted.filter { seen.add(it.packageName) }
+    }
 }

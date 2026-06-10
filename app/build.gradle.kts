@@ -11,8 +11,12 @@ android {
         applicationId = "com.meo.mediawidget"
         minSdk = 31
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
+    }
+
+    buildFeatures {
+        viewBinding = false
     }
 
     buildTypes {
@@ -33,8 +37,10 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.material)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

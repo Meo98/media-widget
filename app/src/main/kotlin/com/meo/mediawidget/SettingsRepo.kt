@@ -29,6 +29,7 @@ class SettingsRepo(private val ctx: Context) {
         fun widgetProgressSet(id: Int) = booleanPreferencesKey("w.$id.showProgressBar.set")
         fun widgetCoverTap(id: Int) = booleanPreferencesKey("w.$id.openAppOnCoverTap")
         fun widgetCoverTapSet(id: Int) = booleanPreferencesKey("w.$id.openAppOnCoverTap.set")
+        fun widgetSelectedApp(id: Int) = stringPreferencesKey("w.$id.selectedAppPackage")
 
         fun widgetAllPrefix(id: Int) = "w.$id."
     }
@@ -77,8 +78,13 @@ class SettingsRepo(private val ctx: Context) {
                 global = prefs[Keys.GLOBAL_COVER_TAP],
                 fallback = true
             ),
-            preferredApp = prefs[Keys.GLOBAL_PREFERRED_APP]
+            preferredApp = prefs[Keys.GLOBAL_PREFERRED_APP],
+            selectedAppPackage = prefs[Keys.widgetSelectedApp(widgetId)]
         )
+    }
+
+    suspend fun writeWidgetSelectedApp(id: Int, pkg: String?) = ctx.dataStore.edit {
+        if (pkg == null) it.remove(Keys.widgetSelectedApp(id)) else it[Keys.widgetSelectedApp(id)] = pkg
     }
 
     suspend fun writeGlobalStyle(s: Style) = ctx.dataStore.edit { it[Keys.GLOBAL_STYLE] = s.name }
