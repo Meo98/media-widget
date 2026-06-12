@@ -11,6 +11,10 @@ on:
 permissions:
   contents: write  # needed for softprops/action-gh-release to create the Release
 
+# Opt the JS-based actions into Node 24 — Node 20 is removed from runners 2026-09-16.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   build:
     runs-on: ubuntu-latest
