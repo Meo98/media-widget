@@ -16,3 +16,8 @@ local.properties
 # OS-specific
 .DS_Store
 Thumbs.db
+
+# Signing — keystore + creds NEVER in repo
+keystore.properties
+*.jks
+*.keystore
