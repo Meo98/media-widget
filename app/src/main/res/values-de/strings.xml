@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Media Widget</string>
+    <string name="listener_label">Media Widget Listener</string>
+
+    <string name="idle_title">Keine Wiedergabe</string>
+    <string name="idle_artist">Starte die Wiedergabe in einer Media-App</string>
+    <string name="need_permission">Tippe in der App auf „Berechtigung erteilen"</string>
+    <string name="unknown_title">Unbekannter Titel</string>
+    <string name="unknown_artist">Unbekannter Interpret</string>
+
+    <string name="cover_desc">Albumcover</string>
+    <string name="play_pause_desc">Wiedergabe / Pause</string>
+    <string name="next_desc">Nächster Titel</string>
+    <string name="prev_desc">Vorheriger Titel</string>
+
+    <string name="permission_explain">Damit das Widget die aktuelle Wiedergabe einer beliebigen App (Tidal, Spotify, YouTube Music …) lesen und steuern kann, brauche ich Zugriff auf die Mitteilungszentrale. Tippe unten auf den Knopf und aktiviere „Media Widget Listener" in der Liste.</string>
+    <string name="open_settings">Berechtigung erteilen</string>
+
+    <string name="action_slot_desc">App-Aktion</string>
+    <string name="app_switcher_desc">Zu dieser App wechseln</string>
+    <string name="app_tagline">Media-Steuerung für deinen Homescreen</string>
+    <string name="global_defaults_subtitle">Gilt für neue Widgets und für alle, die dem Standard folgen.</string>
+    <string name="placed_widgets_subtitle">Tippe auf Konfigurieren, um Widget-spezifische Einstellungen zu ändern</string>
+    <string name="widget_label_fmt">Widget #%1$d</string>
+
+    <!-- Setting help / descriptions -->
+    <string name="setting_style_help">Material You = tonal aus Wallpaper · Glass = blurred Backdrop · AMOLED = pures Schwarz</string>
+    <string name="setting_actions_mode_help">Auto = polished Like/Thumbs + raw fallback · Polished only = nur erkannte · Off = Row aus</string>
+    <string name="setting_allow_raw_help">Auch Aktionen, die das Widget nicht kennt, mit dem Icon der App</string>
+    <string name="setting_progress_help">Position im Titel, nur in der grössten Widget-Grösse</string>
+    <string name="setting_cover_tap_help">Öffnet die App, die gerade spielt</string>
+
+    <string name="setting_remember">Letzte Wiedergabe merken</string>
+    <string name="setting_remember_help">Zeigt Titel und Cover weiter an, wenn die App beendet ist. Play startet sie wieder.</string>
+
+    <string name="access_title">Zugriff</string>
+    <string name="access_row">Benachrichtigungszugriff</string>
+    <string name="access_granted">Erteilt</string>
+    <string name="access_missing">Nicht erteilt. Tippen öffnet die Einstellungen.</string>
+    <string name="actions_mode_auto">Automatisch</string>
+    <string name="actions_mode_polished">Nur bekannte Aktionen</string>
+    <string name="actions_mode_off">Aus</string>
+    <string name="choice_default">Standard verwenden (%1$s)</string>
+    <string name="choice_on">Ein</string>
+    <string name="choice_off">Aus</string>
+    <string name="done">Fertig</string>
+    <string name="reset_widget">Auf Standard zurücksetzen</string>
+    <string name="widget_follows_defaults">Folgt dem Standard</string>
+    <string name="widget_customised">Eigene Einstellungen</string>
+
+    <string name="apps_title">Apps</string>
+    <string name="apps_subtitle">Welche Apps im Widget erscheinen dürfen. Anruf-Apps wie Teams sind von Haus aus ausgeschaltet.</string>
+    <string name="apps_empty">Noch keine App gesehen. Spiele etwas ab, dann erscheint sie hier.</string>
+    <string name="app_nothing_remembered">Nichts gemerkt</string>
+
+    <string name="configure_subtitle">Jede Einstellung folgt dem Standard, bis du sie hier änderst.</string>
+    <string name="use_global_defaults_help">Lass alles auf den globalen Werten (passt sich automatisch an, wenn du dort später was änderst)</string>
+    <string name="use_global_apply">Übernehmen</string>
+    <string name="customize_subtitle">Für jede Einstellung kannst du sie individuell setzen oder mit „Globalen Wert verwenden" auf den Default zurückfallen</string>
+
+    <string name="configure_title">Widget konfigurieren</string>
+    <string name="use_global_defaults">Globale Defaults verwenden</string>
+    <string name="customize">Oder individuell anpassen</string>
+    <string name="setting_style">Stil</string>
+    <string name="setting_actions_mode">App-Aktionen</string>
+    <string name="setting_allow_raw">Unbekannte Aktionen zeigen</string>
+    <string name="setting_progress">Fortschrittsbalken</string>
+    <string name="setting_cover_tap">Tipp aufs Cover öffnet die App</string>
+    <string name="inherit_global">Globalen Wert verwenden</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="save">Speichern</string>
+
+    <string name="global_defaults">Standard für alle Widgets</string>
+    <string name="placed_widgets">Platzierte Widgets</string>
+    <string name="no_widgets_placed">Keine Widgets platziert</string>
+    <string name="reconfigure">Konfigurieren</string>
+    <string name="reset">Reset</string>
+    <string name="permission_active">Benachrichtigungszugriff: aktiv</string>
+    <string name="permission_inactive">Benachrichtigungszugriff: nicht erteilt</string>
+</resources>

@@ -1,60 +1,111 @@
 # Media Widget
 
+[![Latest release](https://img.shields.io/github/v/release/Meo98/media-widget)](https://github.com/Meo98/media-widget/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![minSdk 31](https://img.shields.io/badge/minSdk-31-brightgreen.svg)](#requirements)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.1-blueviolet.svg)](https://kotlinlang.org)
+[![Android 12+](https://img.shields.io/badge/Android-12%2B-brightgreen.svg)](#requirements)
 
-Android-Homescreen-Widget für die aktuell laufende Wiedergabe **beliebiger Media-Apps** (Tidal, Spotify, YouTube Music, KDE Connect, Podcasts …). Auto-updating, adaptive Größen, Material You / Glass / AMOLED Themes, App-spezifische Actions, und Quellen-App-Switcher direkt im Widget.
+A home screen widget that shows and controls whatever is playing on your phone,
+in **any media app**: Spotify, Tidal, YouTube Music, Pocket Casts, audiobooks, VLC,
+KDE Connect and everything else that registers a media session.
+
+No account, no ads, no internet permission. *[Deutsch](README.de.md)*
 
 ## Features
 
-- **Adaptiv:** HxW 1x3 (mini bar) bis 4x5 (volle Karte) — 5 Layout-Buckets passen sich automatisch der gewählten Größe an
-- **3 Themes:** Material You (tonal aus Wallpaper) · Glass (blurred backdrop) · AMOLED (pure black)
-- **Auto-Update:** Track-Wechsel in einer Media-App aktualisiert das Widget innerhalb ~100ms ohne User-Interaktion
-- **App-Switcher:** bis zu 3 aktive Media-Sessions als Icons in der Ecke — Tap wechselt die Quelle, Play/Pause steuert die gewählte App
-- **App-spezifische Actions:** Like in Tidal, Thumbs-up in YouTube Music, Heart in Spotify; generisch für andere Apps
-- **Per-Widget-Settings:** jedes Widget hat eigenen Style/Mode (global Defaults mit per-Widget Overrides via INHERIT-Sentinel)
-- **Cover-Tap öffnet App:** Tipp auf Album-Cover bringt die Source-App in den Vordergrund
+- **Works with every media app.** The widget reads Android's media sessions, so it
+  needs no per-app integration.
+- **Remembers what you listened to.** Close the app and the widget keeps title and
+  cover. Press play and it starts the app again where you left off.
+- **App switcher.** Icons in the corner show your running and recent media apps.
+  Tap one to make the widget control that app.
+- **Call apps stay out.** Teams, Meet, Zoom and the phone app open a media session
+  during calls. The widget ignores them, and you decide per app what may appear.
+- **Five layouts, one widget.** Resize it from a 1×3 bar to a 4×5 card and the
+  layout follows.
+- **Four styles.** Material You (colours from your wallpaper), Glass (blurred
+  cover), AMOLED (pure black) and OxygenOS (matches OnePlus/OPPO system widgets).
+  Set a default and override it per widget.
+- **Feels like a system app.** The settings follow your phone's own look, and the
+  APK is 8 MB with no third-party UI libraries.
+- **App actions.** Like, thumbs up, shuffle, repeat, skip 30 s and other actions the
+  app offers appear as extra buttons.
+- **English and German.**
+
+## Install
+
+**[Download the latest APK](https://github.com/Meo98/media-widget/releases/latest)** and open it on your phone.
+
+To get updates automatically, add the repository URL to
+[Obtainium](https://github.com/ImranR98/Obtainium):
+
+```
+https://github.com/Meo98/media-widget
+```
+
+## Setup
+
+1. Open **Media Widget** and tap **Grant access**.
+2. Enable **Media Widget Listener** in the list.
+3. Long-press your home screen, choose **Widgets** and place **Media Widget**.
+
+### Why notification access?
+
+Android only lets an app see other apps' media sessions if it holds notification
+access. There is no narrower permission. The widget's listener is an
+[empty class](app/src/main/kotlin/com/meo/mediawidget/NotifListener.kt): it reads
+no notifications, and the app has no internet permission, so nothing can leave
+your phone.
 
 ## Requirements
 
-- Android 12+ (API 31)
-- Eine Media-App, die `MediaSession` korrekt registriert (Tidal, Spotify, YouTube Music, VLC, KDE Connect, etc.)
-- Notification-Listener-Permission (einmalig zu erteilen)
+- Android 12 or newer
+- A media app that registers a `MediaSession` (practically all of them do)
 
-## Build & Install
+## Good to know
+
+- **Resuming a closed app** depends on that app. The widget first asks the app's
+  media service to continue, then sends it a play command, and if neither works it
+  opens the app. Android limits what apps may start in the background, so some
+  apps need that last step.
+- **The progress bar** updates when the track or play state changes, not every
+  second. Widgets are not allowed to redraw continuously.
+
+## Build
 
 ```bash
-export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
 ./gradlew assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-APK wird als `app/build/outputs/apk/debug/app-debug.apk` ausgegeben (~14 MB).
+You need JDK 17 and the Android SDK (platform 35). Run the unit tests with
+`./gradlew testDebugUnitTest`.
 
-## Setup
+## How it works
 
-1. App starten → „Berechtigung erteilen" tippen
-2. In den System-Settings „Media Widget Listener" aktivieren
-3. Zurück zum Homescreen → langes Drücken → Widgets → Media Widget platzieren
-4. ConfigureActivity erscheint → Globale Defaults verwenden oder pro Widget anpassen
+- `NotifListener` holds the notification access and hosts `MediaSessionTracker`,
+  which listens for session and playback changes and redraws the widgets.
+- `SessionFilter` separates media from calls; `SourcePicker` decides which app a
+  widget shows. Both are plain functions with unit tests.
+- `MediaMemory` stores the last title and cover per app in private app storage.
+- `Resumer` restarts a closed app (media browser service, then media button, then
+  opening the app).
+- `MediaWidgetProvider` picks one of five layouts from the widget's size and fills
+  it. Widgets are `RemoteViews` only, no Compose.
 
-## Architektur
+Launcher quirks found along the way (OnePlus/OPPO `android:configure`, the
+`RemoteViews` view whitelist, `goAsync()` limits) are documented in
+[docs/launcher-quirks.md](docs/launcher-quirks.md).
 
-Siehe [`docs/specs/2026-06-09-widget-v2-design.md`](docs/specs/2026-06-09-widget-v2-design.md) für die volle Design-Spec und [`docs/plans/2026-06-09-widget-v2.md`](docs/plans/2026-06-09-widget-v2.md) für den schrittweisen Implementations-Plan.
+## Contributing
 
-Kurz-Übersicht:
+Bug reports and pull requests are welcome. If the widget picks the wrong layout
+on your launcher, enable the debug log and attach the `render` line:
 
-- `MediaSessionTracker` (Singleton im NotifListener-Process) hört auf `OnActiveSessionsChangedListener` und per-Controller `MediaController.Callback`; debounced 100ms pusht Widget-Updates
-- `MediaWidgetProvider` rendert pro Widget den passenden Bucket-Layout, holt `OPTION_APPWIDGET_MIN_*` aus dem Options-Bundle und mapped es via `Bucket.pickForSize` direkt — keine SizeF-Map-Gaps
-- Settings via `androidx.datastore:datastore-preferences` mit `global.*` und per-Widget `w.<id>.*` Keys, `INHERIT`-Sentinel für String-Resolutionen
-
-## Bekannte Quirks
-
-- **OPlus-Launcher (OnePlus/OPPO/Realme):** `android:configure` muss als reiner Klassenname stehen (`com.meo.mediawidget.ConfigureActivity`), NICHT als `package/class` — der Launcher prefix-t Package selbst, beim `/`-Format crasht Resolution mit START_CLASS_NOT_FOUND
-- **`<Space>` und `<View>` sind NICHT in der RemoteViews-Whitelist** — nur `@RemoteView`-annotierte Klassen sind erlaubt. Spacer per `<FrameLayout layout_weight=1/>`
-- **`goAsync()` ist nur 1× pro `onReceive` erlaubt** — `onUpdate(ids)` mit Schleife kann das schnell sprengen; wir nutzen synchronen `runBlocking` für DataStore-Read
+```bash
+adb shell setprop log.tag.MediaWidget DEBUG
+adb logcat -s MediaWidget
+```
 
 ## License
 
-MIT — siehe [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).

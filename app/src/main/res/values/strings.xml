@@ -3,56 +3,78 @@
     <string name="app_name">Media Widget</string>
     <string name="listener_label">Media Widget Listener</string>
 
-    <string name="idle_title">Keine Wiedergabe</string>
-    <string name="idle_artist">– kein aktives Medium –</string>
-    <string name="need_permission">Tippe in der App auf „Berechtigung erteilen"</string>
-    <string name="unknown_title">Unbekannter Titel</string>
-    <string name="unknown_artist">Unbekannter Interpret</string>
+    <string name="idle_title">Nothing playing</string>
+    <string name="idle_artist">Start playback in any media app</string>
+    <string name="need_permission">Open the app and tap “Grant access”</string>
+    <string name="unknown_title">Unknown title</string>
+    <string name="unknown_artist">Unknown artist</string>
 
-    <string name="cover_desc">Albumcover</string>
-    <string name="play_pause_desc">Wiedergabe / Pause</string>
-    <string name="next_desc">Nächster Titel</string>
-    <string name="prev_desc">Vorheriger Titel</string>
+    <string name="cover_desc">Album cover</string>
+    <string name="play_pause_desc">Play / pause</string>
+    <string name="next_desc">Next track</string>
+    <string name="prev_desc">Previous track</string>
 
-    <string name="permission_explain">Damit das Widget die aktuelle Wiedergabe einer beliebigen App (Tidal, Spotify, YouTube Music …) lesen und steuern kann, brauche ich Zugriff auf die Mitteilungszentrale. Tippe unten auf den Knopf und aktiviere „Media Widget Listener" in der Liste.</string>
-    <string name="open_settings">Berechtigung erteilen</string>
+    <string name="permission_explain">To read and control what any app is playing (Tidal, Spotify, YouTube Music …), the widget needs notification access. Android only exposes media sessions to apps with that permission; your notifications are never read. Tap the button and enable “Media Widget Listener”.</string>
+    <string name="open_settings">Grant access</string>
 
-    <string name="action_slot_desc">App-Aktion</string>
-    <string name="app_switcher_desc">Zu dieser App wechseln</string>
-    <string name="app_tagline">Media-Steuerung für deinen Homescreen</string>
-    <string name="global_defaults_subtitle">Werden für neue und INHERIT-Widgets verwendet</string>
-    <string name="placed_widgets_subtitle">Tippe auf Konfigurieren, um Widget-spezifische Einstellungen zu ändern</string>
+    <string name="action_slot_desc">App action</string>
+    <string name="app_switcher_desc">Switch to this app</string>
+    <string name="app_tagline">Media controls for your home screen</string>
+    <string name="global_defaults_subtitle">Used by new widgets and by widgets that follow the defaults</string>
+    <string name="placed_widgets_subtitle">Tap Configure to change the settings of a single widget</string>
     <string name="widget_label_fmt">Widget #%1$d</string>
 
     <!-- Setting help / descriptions -->
-    <string name="setting_style_help">Material You = tonal aus Wallpaper · Glass = blurred Backdrop · AMOLED = pures Schwarz</string>
-    <string name="setting_actions_mode_help">Auto = polished Like/Thumbs + raw fallback · Polished only = nur erkannte · Off = Row aus</string>
-    <string name="setting_allow_raw_help">Im Auto-Modus: zeigt auch unbekannte App-Actions mit deren Original-Icon</string>
-    <string name="setting_progress_help">Track-Position als Balken unten in der 4x5-Variante</string>
-    <string name="setting_cover_tap_help">Tipp auf das Album-Cover öffnet die spielende App im Vordergrund</string>
+    <string name="setting_style_help">Material You = colours from your wallpaper · Glass = blurred cover behind · AMOLED = pure black</string>
+    <string name="setting_actions_mode_help">Auto = known actions (like, thumbs) plus the app\'s own · Polished only = known actions · Off = no action row</string>
+    <string name="setting_allow_raw_help">Also show actions the widget does not know, with the app\'s own icon</string>
+    <string name="setting_progress_help">Position in the track, largest widget size only</string>
+    <string name="setting_cover_tap_help">Opens the app that is playing</string>
+    <string name="setting_remember">Remember last playback</string>
+    <string name="setting_remember_help">Keeps title and cover on the widget after the app is closed. Play starts the app again.</string>
 
-    <string name="configure_subtitle">Pro Widget eigene Einstellungen oder globale Defaults</string>
-    <string name="use_global_defaults_help">Lass alles auf den globalen Werten (passt sich automatisch an, wenn du dort später was änderst)</string>
-    <string name="use_global_apply">Übernehmen</string>
-    <string name="customize_subtitle">Für jede Einstellung kannst du sie individuell setzen oder mit „Globalen Wert verwenden" auf den Default zurückfallen</string>
+    <string name="access_title">Access</string>
+    <string name="access_row">Notification access</string>
+    <string name="access_granted">Granted</string>
+    <string name="access_missing">Not granted. Tap to open the settings.</string>
+    <string name="actions_mode_auto">Automatic</string>
+    <string name="actions_mode_polished">Known actions only</string>
+    <string name="actions_mode_off">Off</string>
+    <string name="choice_default">Use default (%1$s)</string>
+    <string name="choice_on">On</string>
+    <string name="choice_off">Off</string>
+    <string name="done">Done</string>
+    <string name="reset_widget">Reset to defaults</string>
+    <string name="widget_follows_defaults">Follows the defaults</string>
+    <string name="widget_customised">Own settings</string>
 
-    <string name="configure_title">Widget konfigurieren</string>
-    <string name="use_global_defaults">Globale Defaults verwenden</string>
-    <string name="customize">Oder individuell anpassen</string>
+    <string name="apps_title">Apps</string>
+    <string name="apps_subtitle">Choose which apps may appear on the widget. Call apps such as Teams are off by default.</string>
+    <string name="apps_empty">No app seen yet. Play something and it will show up here.</string>
+    <string name="app_nothing_remembered">Nothing remembered</string>
+
+    <string name="configure_subtitle">Each setting follows the default until you change it here.</string>
+    <string name="use_global_defaults_help">Follow the defaults; the widget changes with them when you edit them later</string>
+    <string name="use_global_apply">Apply</string>
+    <string name="customize_subtitle">Set each option yourself, or tick “Use default” to follow the default</string>
+
+    <string name="configure_title">Configure widget</string>
+    <string name="use_global_defaults">Use the defaults</string>
+    <string name="customize">Or customise</string>
     <string name="setting_style">Style</string>
-    <string name="setting_actions_mode">App-Actions Modus</string>
-    <string name="setting_allow_raw">Unbekannte App-Actions erlauben (Auto-Modus)</string>
-    <string name="setting_progress">Progress-Bar anzeigen (nur MEGA)</string>
-    <string name="setting_cover_tap">Cover-Tap öffnet App</string>
-    <string name="inherit_global">Globalen Wert verwenden</string>
-    <string name="cancel">Abbrechen</string>
-    <string name="save">Speichern</string>
+    <string name="setting_actions_mode">App actions</string>
+    <string name="setting_allow_raw">Show unknown actions</string>
+    <string name="setting_progress">Progress bar</string>
+    <string name="setting_cover_tap">Tap cover to open the app</string>
+    <string name="inherit_global">Use default</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
 
-    <string name="global_defaults">Globale Defaults</string>
-    <string name="placed_widgets">Platzierte Widgets</string>
-    <string name="no_widgets_placed">Keine Widgets platziert</string>
-    <string name="reconfigure">Konfigurieren</string>
+    <string name="global_defaults">Defaults</string>
+    <string name="placed_widgets">Placed widgets</string>
+    <string name="no_widgets_placed">No widgets placed</string>
+    <string name="reconfigure">Configure</string>
     <string name="reset">Reset</string>
-    <string name="permission_active">Benachrichtigungszugriff: aktiv</string>
-    <string name="permission_inactive">Benachrichtigungszugriff: nicht erteilt</string>
+    <string name="permission_active">Notification access: granted</string>
+    <string name="permission_inactive">Notification access: not granted</string>
 </resources>

@@ -11,6 +11,11 @@
     <color name="material_surface">@android:color/system_accent2_800</color>
     <color name="material_cover_bg">@android:color/system_accent1_700</color>
 
+    <color name="oxygen_surface">#FF202020</color>
+    <color name="oxygen_cover_bg">#FF303030</color>
+    <color name="oxygen_text_primary">#FFF0F0F0</color>
+    <color name="oxygen_text_secondary">#FF8A8A8A</color>
+
     <!-- Material 3 app-UI colors (dark theme) -->
     <color name="md3_primary">@android:color/system_accent1_200</color>
     <color name="md3_on_primary">@android:color/system_accent1_900</color>

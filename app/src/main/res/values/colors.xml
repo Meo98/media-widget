@@ -23,6 +23,13 @@
     <color name="amoled_surface">#FF000000</color>
     <color name="amoled_cover_bg">#FF101010</color>
 
+    <!-- OxygenOS-Stil: neutrale Karte wie in den OnePlus-Einstellungen, Akzent am Gerät gemessen -->
+    <color name="oxygen_surface">#FFFFFFFF</color>
+    <color name="oxygen_cover_bg">#FFF2F2F2</color>
+    <color name="oxygen_text_primary">#FF141414</color>
+    <color name="oxygen_text_secondary">#FF808080</color>
+    <color name="oxygen_accent">#FFFF5629</color>
+
     <!-- Material 3 app-UI colors (light theme), derived from system Material You palette -->
     <color name="md3_primary">@android:color/system_accent1_600</color>
     <color name="md3_on_primary">@android:color/system_accent1_0</color>

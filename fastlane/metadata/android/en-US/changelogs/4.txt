@@ -1,0 +1,6 @@
+* Remembers the last title and cover after an app is closed; play starts the app again
+* Call apps (Teams, Meet, Zoom, phone) no longer show up; new per-app switches
+* App icons and "open app" now work for all apps (package visibility)
+* The app you start last takes over the widget, a tap in the switcher still wins
+* English translation
+* New OxygenOS widget style; settings redesigned in system style, APK shrunk from 14 to 8 MB

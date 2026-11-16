@@ -29,8 +29,8 @@ android {
         applicationId = "com.meo.mediawidget"
         minSdk = 31
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.2.2"
+        versionCode = 4
+        versionName = "0.3.0"
     }
 
     buildFeatures {
@@ -49,6 +49,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Eigene Kennung: der Testbuild lässt sich neben der veröffentlichten
+            // Version installieren, egal mit welchem Debug-Schlüssel er signiert ist.
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             isMinifyEnabled = false
             if (hasReleaseSigning) {
@@ -69,10 +75,8 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.material)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

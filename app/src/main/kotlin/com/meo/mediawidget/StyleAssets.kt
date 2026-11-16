@@ -12,7 +12,9 @@ data class StyleAssets(
     @ColorInt val buttonTint: Int,
     val coverCornerDp: Int,
     val containerCornerDp: Int,
-    val useBlurredBackdrop: Boolean
+    val useBlurredBackdrop: Boolean,
+    /** Eigene Farbe für den Play-Knopf; ohne Angabe wie die übrigen Knöpfe. */
+    @ColorInt val playTint: Int = buttonTint
 ) {
     companion object {
         fun forStyle(style: Style, ctx: Context): StyleAssets = when (style) {
@@ -33,6 +35,16 @@ data class StyleAssets(
                 buttonTint = ctx.getColor(R.color.glass_button_tint),
                 coverCornerDp = 16, containerCornerDp = 24,
                 useBlurredBackdrop = true
+            )
+            Style.OXYGEN -> StyleAssets(
+                containerBg = R.drawable.bg_oxygen,
+                coverBg = R.drawable.bg_cover_oxygen,
+                textPrimary = ctx.getColor(R.color.oxygen_text_primary),
+                textSecondary = ctx.getColor(R.color.oxygen_text_secondary),
+                buttonTint = ctx.getColor(R.color.oxygen_text_primary),
+                coverCornerDp = 14, containerCornerDp = 24,
+                useBlurredBackdrop = false,
+                playTint = ctx.getColor(R.color.oxygen_accent)
             )
             Style.AMOLED -> StyleAssets(
                 containerBg = R.drawable.bg_amoled,

@@ -9,6 +9,7 @@ import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.os.Handler
 import android.os.Looper
+import kotlinx.coroutines.runBlocking
 
 object MediaSessionTracker {
 
@@ -87,6 +88,10 @@ object MediaSessionTracker {
 
     private fun reallyPushUpdate() {
         val app = appContext ?: return
+        // Erst das Gedächtnis nachführen, dann zeichnen: das Widget liest daraus,
+        // welche App zuletzt zu spielen begann.
+        val remember = runBlocking { SettingsRepo(app).readGlobalConfig().rememberLast }
+        MediaMemory.sync(app, controllerCallbacks.values.map { it.first }, keepDetails = remember)
         MediaWidgetProvider.requestUpdate(app)
     }
 

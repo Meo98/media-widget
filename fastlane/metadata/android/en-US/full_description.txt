@@ -1,0 +1,16 @@
+Media Widget shows and controls whatever is playing on your phone, in any media app: Spotify, Tidal, YouTube Music, Pocket Casts, audiobooks, VLC, KDE Connect and everything else that registers a media session.
+
+<b>Features</b>
+
+* Works with every media app, no per-app setup
+* Remembers the last title and cover after the app is closed; play starts it again
+* App switcher: pick which running or recent app the widget controls
+* Ignores call apps such as Teams, Meet and Zoom; choose per app what may appear
+* Five layouts in one widget, from a 1×3 bar to a 4×5 card
+* Four styles: Material You, Glass, AMOLED and OxygenOS, with per-widget overrides
+* Extra buttons for the actions an app offers (like, shuffle, skip 30 s …)
+* English and German
+
+<b>Permissions</b>
+
+The widget needs notification access, because Android only exposes media sessions to apps that hold it. It reads no notifications. The app has no internet permission.

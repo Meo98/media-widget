@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
@@ -20,6 +21,11 @@ class SettingsRepo(private val ctx: Context) {
         val GLOBAL_PROGRESS = booleanPreferencesKey("global.showProgressBar")
         val GLOBAL_COVER_TAP = booleanPreferencesKey("global.openAppOnCoverTap")
         val GLOBAL_PREFERRED_APP = stringPreferencesKey("global.preferredApp")
+        val GLOBAL_REMEMBER = booleanPreferencesKey("global.rememberLast")
+
+        const val APP_VISIBLE_PREFIX = "app.visible."
+        fun appVisible(pkg: String) = booleanPreferencesKey(APP_VISIBLE_PREFIX + pkg)
+        fun widgetSelectedAt(id: Int) = longPreferencesKey("w.$id.selectedAt")
 
         fun widgetStyle(id: Int) = stringPreferencesKey("w.$id.style")
         fun widgetActionsMode(id: Int) = stringPreferencesKey("w.$id.appActionsMode")
@@ -43,8 +49,38 @@ class SettingsRepo(private val ctx: Context) {
             appActionsAllowRaw = prefs[Keys.GLOBAL_ACTIONS_RAW] ?: true,
             showProgressBar = prefs[Keys.GLOBAL_PROGRESS] ?: true,
             openAppOnCoverTap = prefs[Keys.GLOBAL_COVER_TAP] ?: true,
-            preferredApp = prefs[Keys.GLOBAL_PREFERRED_APP]
+            preferredApp = prefs[Keys.GLOBAL_PREFERRED_APP],
+            rememberLast = prefs[Keys.GLOBAL_REMEMBER] ?: true,
+            appVisibility = appVisibility(prefs)
         )
+    }
+
+    private fun appVisibility(prefs: Preferences): Map<String, Boolean> =
+        prefs.asMap().entries
+            .filter { it.key.name.startsWith(Keys.APP_VISIBLE_PREFIX) && it.value is Boolean }
+            .associate { it.key.name.removePrefix(Keys.APP_VISIBLE_PREFIX) to (it.value as Boolean) }
+
+    /** Nur die eigenen Abweichungen eines Widgets, ohne Rückfall auf den Standard. */
+    suspend fun readWidgetOverrides(id: Int): WidgetOverrides {
+        val prefs = ctx.dataStore.data.first()
+        fun bool(set: Preferences.Key<Boolean>, value: Preferences.Key<Boolean>) =
+            if (prefs[set] == true) prefs[value] else null
+        return WidgetOverrides(
+            style = prefs[Keys.widgetStyle(id)]?.takeIf { it != "INHERIT" }?.let { Style.valueOf(it) },
+            appActionsMode = prefs[Keys.widgetActionsMode(id)]?.takeIf { it != "INHERIT" }
+                ?.let { AppActionsMode.valueOf(it) },
+            appActionsAllowRaw = bool(Keys.widgetActionsRawSet(id), Keys.widgetActionsRaw(id)),
+            showProgressBar = bool(Keys.widgetProgressSet(id), Keys.widgetProgress(id)),
+            openAppOnCoverTap = bool(Keys.widgetCoverTapSet(id), Keys.widgetCoverTap(id))
+        )
+    }
+
+    /** Setzt Stil und Verhalten eines Widgets auf den Standard zurück; die gewählte App bleibt. */
+    suspend fun clearWidgetOverrides(id: Int) = ctx.dataStore.edit {
+        it.remove(Keys.widgetStyle(id)); it.remove(Keys.widgetActionsMode(id))
+        it.remove(Keys.widgetActionsRaw(id)); it.remove(Keys.widgetActionsRawSet(id))
+        it.remove(Keys.widgetProgress(id)); it.remove(Keys.widgetProgressSet(id))
+        it.remove(Keys.widgetCoverTap(id)); it.remove(Keys.widgetCoverTapSet(id))
     }
 
     suspend fun resolve(widgetId: Int): WidgetConfig {
@@ -79,13 +115,23 @@ class SettingsRepo(private val ctx: Context) {
                 fallback = true
             ),
             preferredApp = prefs[Keys.GLOBAL_PREFERRED_APP],
-            selectedAppPackage = prefs[Keys.widgetSelectedApp(widgetId)]
+            selectedAppPackage = prefs[Keys.widgetSelectedApp(widgetId)],
+            selectedAt = prefs[Keys.widgetSelectedAt(widgetId)] ?: 0L,
+            rememberLast = prefs[Keys.GLOBAL_REMEMBER] ?: true,
+            appVisibility = appVisibility(prefs)
         )
     }
 
-    suspend fun writeWidgetSelectedApp(id: Int, pkg: String?) = ctx.dataStore.edit {
-        if (pkg == null) it.remove(Keys.widgetSelectedApp(id)) else it[Keys.widgetSelectedApp(id)] = pkg
+    suspend fun writeWidgetSelectedApp(id: Int, pkg: String?, at: Long = System.currentTimeMillis()) = ctx.dataStore.edit {
+        if (pkg == null) {
+            it.remove(Keys.widgetSelectedApp(id)); it.remove(Keys.widgetSelectedAt(id))
+        } else {
+            it[Keys.widgetSelectedApp(id)] = pkg; it[Keys.widgetSelectedAt(id)] = at
+        }
     }
+
+    suspend fun writeGlobalRemember(v: Boolean) = ctx.dataStore.edit { it[Keys.GLOBAL_REMEMBER] = v }
+    suspend fun writeAppVisible(pkg: String, visible: Boolean) = ctx.dataStore.edit { it[Keys.appVisible(pkg)] = visible }
 
     suspend fun writeGlobalStyle(s: Style) = ctx.dataStore.edit { it[Keys.GLOBAL_STYLE] = s.name }
     suspend fun writeGlobalActionsMode(m: AppActionsMode) = ctx.dataStore.edit { it[Keys.GLOBAL_ACTIONS_MODE] = m.name }
