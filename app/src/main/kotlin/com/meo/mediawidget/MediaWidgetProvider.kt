@@ -180,14 +180,13 @@ class MediaWidgetProvider : AppWidgetProvider() {
             Bucket.MEGA -> R.layout.widget_mega
         }
         val rv = RemoteViews(ctx.packageName, layoutId)
-        val assets = StyleAssets.forStyle(config.style, ctx)
         val md = shown.controller?.metadata
         val art: Bitmap? = md?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
             ?: md?.getBitmap(MediaMetadata.METADATA_KEY_ART)
             ?: shown.remembered?.let { MediaMemory.cover(ctx, it.pkg) }
 
         bindContent(ctx, rv, bucket, config, shown, art)
-        applyStyle(ctx, rv, bucket, assets, art)
+        config.theme.applyTo(ctx, rv, art, allowBackdrop = bucket == Bucket.MEGA)
         bindAppActions(ctx, rv, bucket, config, shown.controller, widgetId)
         bindAppSwitchers(ctx, rv, bucket, shown, widgetId)
         bindClicks(ctx, rv, config, shown, widgetId)
@@ -269,33 +268,6 @@ class MediaWidgetProvider : AppWidgetProvider() {
                 }
             } catch (_: Throwable) {}
         }
-    }
-
-    private fun applyStyle(
-        ctx: Context, rv: RemoteViews, bucket: Bucket, assets: StyleAssets, art: Bitmap?
-    ) {
-        rv.setInt(R.id.container, "setBackgroundResource", assets.containerBg)
-        tryColor(rv, R.id.title, assets.textPrimary)
-        tryColor(rv, R.id.artist, assets.textSecondary)
-        tryTint(rv, R.id.btn_play_pause, assets.playTint)
-        tryTint(rv, R.id.btn_prev, assets.buttonTint)
-        tryTint(rv, R.id.btn_next, assets.buttonTint)
-        tryInt(rv, R.id.cover, "setBackgroundResource", assets.coverBg)
-
-        if (assets.useBlurredBackdrop && bucket == Bucket.MEGA && art != null) {
-            rv.setImageViewBitmap(R.id.backdrop, BlurHelper.blurForGlass(art, ctx))
-            rv.setViewVisibility(R.id.backdrop, View.VISIBLE)
-        } else {
-            tryVisibility(rv, R.id.backdrop, View.GONE)
-        }
-    }
-
-    private fun tryColor(rv: RemoteViews, viewId: Int, color: Int) {
-        try { rv.setTextColor(viewId, color) } catch (_: Throwable) {}
-    }
-
-    private fun tryTint(rv: RemoteViews, viewId: Int, color: Int) {
-        try { rv.setInt(viewId, "setColorFilter", color) } catch (_: Throwable) {}
     }
 
     private fun tryInt(rv: RemoteViews, viewId: Int, method: String, value: Int) {

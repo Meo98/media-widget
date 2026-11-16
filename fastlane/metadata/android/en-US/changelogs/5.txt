@@ -1,0 +1,3 @@
+* New built-in styles: One UI (Samsung), HyperOS (Xiaomi), Nothing OS
+* Style editor with live preview: make your own style with colours, opacity, corner radius and blurred backdrop
+* Widgets follow light/dark mode changes immediately

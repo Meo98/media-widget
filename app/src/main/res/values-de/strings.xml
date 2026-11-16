@@ -49,6 +49,30 @@
     <string name="widget_follows_defaults">Folgt dem Standard</string>
     <string name="widget_customised">Eigene Einstellungen</string>
 
+    <string name="custom_styles">Eigene Stile</string>
+    <string name="new_style">Stil erstellen</string>
+    <string name="new_style_help">Von einer Vorlage ausgehen, dann Farben, Ecken und Deckkraft ändern</string>
+    <string name="editor_title">Stil bearbeiten</string>
+    <string name="my_style">Mein Stil</string>
+    <string name="style_name">Name</string>
+    <string name="style_base">Vorlage übernehmen</string>
+    <string name="style_base_help">Ersetzt Farben und Form unten</string>
+    <string name="colors_title">Farben</string>
+    <string name="color_background">Hintergrund</string>
+    <string name="color_text">Titel</string>
+    <string name="color_subtext">Interpret</string>
+    <string name="color_buttons">Knöpfe</string>
+    <string name="color_play">Play-Knopf</string>
+    <string name="shape_title">Form</string>
+    <string name="opacity">Deckkraft des Hintergrunds</string>
+    <string name="radius">Eckenradius</string>
+    <string name="radius_system">Ecken vom Launcher übernehmen</string>
+    <string name="blur">Unscharfes Cover dahinter</string>
+    <string name="blur_help">Nur in der grössten Widget-Grösse</string>
+    <string name="delete_style">Stil löschen</string>
+    <string name="preview_title">Songtitel</string>
+    <string name="preview_artist">Interpret</string>
+
     <string name="apps_title">Apps</string>
     <string name="apps_subtitle">Welche Apps im Widget erscheinen dürfen. Anruf-Apps wie Teams sind von Haus aus ausgeschaltet.</string>
     <string name="apps_empty">Noch keine App gesehen. Spiele etwas ab, dann erscheint sie hier.</string>

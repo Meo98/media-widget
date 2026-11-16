@@ -48,6 +48,30 @@
     <string name="widget_follows_defaults">Follows the defaults</string>
     <string name="widget_customised">Own settings</string>
 
+    <string name="custom_styles">Your styles</string>
+    <string name="new_style">Create a style</string>
+    <string name="new_style_help">Start from a built-in style, then change colours, corners and transparency</string>
+    <string name="editor_title">Edit style</string>
+    <string name="my_style">My style</string>
+    <string name="style_name">Name</string>
+    <string name="style_base">Copy from a built-in style</string>
+    <string name="style_base_help">Replaces the colours and shape below</string>
+    <string name="colors_title">Colours</string>
+    <string name="color_background">Background</string>
+    <string name="color_text">Title</string>
+    <string name="color_subtext">Artist</string>
+    <string name="color_buttons">Buttons</string>
+    <string name="color_play">Play button</string>
+    <string name="shape_title">Shape</string>
+    <string name="opacity">Background opacity</string>
+    <string name="radius">Corner radius</string>
+    <string name="radius_system">Use the launcher\'s corners</string>
+    <string name="blur">Blurred cover behind</string>
+    <string name="blur_help">Largest widget size only</string>
+    <string name="delete_style">Delete style</string>
+    <string name="preview_title">Song title</string>
+    <string name="preview_artist">Artist</string>
+
     <string name="apps_title">Apps</string>
     <string name="apps_subtitle">Choose which apps may appear on the widget. Call apps such as Teams are off by default.</string>
     <string name="apps_empty">No app seen yet. Play something and it will show up here.</string>

@@ -1,14 +1,5 @@
 package com.meo.mediawidget
 
-/** Neue Stile hinten anhängen: gespeichert wird der Name. [label] ist ein Eigenname, darum unübersetzt. */
-enum class Style(val label: String) {
-    MATERIAL_YOU("Material You"),
-    GLASS("Glass"),
-    AMOLED("AMOLED"),
-    /** Wie die Karten der OnePlus/OPPO-Oberfläche: neutrale Fläche, oranger Play-Knopf. */
-    OXYGEN("OxygenOS")
-}
-
 enum class AppActionsMode(val labelRes: Int) {
     AUTO(R.string.actions_mode_auto),
     POLISHED_ONLY(R.string.actions_mode_polished),
@@ -17,7 +8,8 @@ enum class AppActionsMode(val labelRes: Int) {
 
 /** Was ein einzelnes Widget abweichend vom Standard gesetzt hat. null = folgt dem Standard. */
 data class WidgetOverrides(
-    val style: Style? = null,
+    /** Kennung des Stils (siehe [Themes]). */
+    val themeId: String? = null,
     val appActionsMode: AppActionsMode? = null,
     val appActionsAllowRaw: Boolean? = null,
     val showProgressBar: Boolean? = null,
@@ -25,7 +17,7 @@ data class WidgetOverrides(
 )
 
 data class WidgetConfig(
-    val style: Style = Style.MATERIAL_YOU,
+    val theme: Theme = Themes.builtIn.first(),
     val appActionsMode: AppActionsMode = AppActionsMode.AUTO,
     val appActionsAllowRaw: Boolean = true,
     val showProgressBar: Boolean = true,

@@ -5,6 +5,7 @@
 
     <LinearLayout
         android:id="@+id/container"
+        android:clipToOutline="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -14,6 +15,7 @@
 
         <ImageView
             android:id="@+id/cover"
+        android:clipToOutline="true"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:scaleType="centerCrop"

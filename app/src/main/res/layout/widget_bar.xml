@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
+        android:clipToOutline="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
@@ -10,6 +11,7 @@
 
     <ImageView
         android:id="@+id/cover"
+        android:clipToOutline="true"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:scaleType="centerCrop"

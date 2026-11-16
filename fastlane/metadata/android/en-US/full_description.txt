@@ -7,7 +7,8 @@ Media Widget shows and controls whatever is playing on your phone, in any media 
 * App switcher: pick which running or recent app the widget controls
 * Ignores call apps such as Teams, Meet and Zoom; choose per app what may appear
 * Five layouts in one widget, from a 1×3 bar to a 4×5 card
-* Four styles: Material You, Glass, AMOLED and OxygenOS, with per-widget overrides
+* Built-in styles for Pixel, OnePlus/OPPO, Samsung, Xiaomi and Nothing phones, plus Glass and AMOLED
+* Style editor with live preview: colours, opacity, corner radius, blurred backdrop
 * Extra buttons for the actions an app offers (like, shuffle, skip 30 s …)
 * English and German
 

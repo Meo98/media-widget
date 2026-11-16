@@ -16,6 +16,7 @@ class SettingsRepo(private val ctx: Context) {
 
     private object Keys {
         val GLOBAL_STYLE = stringPreferencesKey("global.style")
+        val CUSTOM_THEMES = stringPreferencesKey("themes.custom")
         val GLOBAL_ACTIONS_MODE = stringPreferencesKey("global.appActionsMode")
         val GLOBAL_ACTIONS_RAW = booleanPreferencesKey("global.appActionsAllowRaw")
         val GLOBAL_PROGRESS = booleanPreferencesKey("global.showProgressBar")
@@ -44,7 +45,7 @@ class SettingsRepo(private val ctx: Context) {
     suspend fun readGlobalConfig(): WidgetConfig {
         val prefs = ctx.dataStore.data.first()
         return WidgetConfig(
-            style = Style.valueOf(prefs[Keys.GLOBAL_STYLE] ?: Style.MATERIAL_YOU.name),
+            theme = Themes.find(prefs[Keys.GLOBAL_STYLE], Themes.parseCustom(prefs[Keys.CUSTOM_THEMES])),
             appActionsMode = AppActionsMode.valueOf(prefs[Keys.GLOBAL_ACTIONS_MODE] ?: AppActionsMode.AUTO.name),
             appActionsAllowRaw = prefs[Keys.GLOBAL_ACTIONS_RAW] ?: true,
             showProgressBar = prefs[Keys.GLOBAL_PROGRESS] ?: true,
@@ -66,7 +67,7 @@ class SettingsRepo(private val ctx: Context) {
         fun bool(set: Preferences.Key<Boolean>, value: Preferences.Key<Boolean>) =
             if (prefs[set] == true) prefs[value] else null
         return WidgetOverrides(
-            style = prefs[Keys.widgetStyle(id)]?.takeIf { it != "INHERIT" }?.let { Style.valueOf(it) },
+            themeId = prefs[Keys.widgetStyle(id)]?.takeIf { it != "INHERIT" },
             appActionsMode = prefs[Keys.widgetActionsMode(id)]?.takeIf { it != "INHERIT" }
                 ?.let { AppActionsMode.valueOf(it) },
             appActionsAllowRaw = bool(Keys.widgetActionsRawSet(id), Keys.widgetActionsRaw(id)),
@@ -86,11 +87,14 @@ class SettingsRepo(private val ctx: Context) {
     suspend fun resolve(widgetId: Int): WidgetConfig {
         val prefs = ctx.dataStore.data.first()
         return WidgetConfig(
-            style = Style.valueOf(SettingsResolver.resolveString(
-                perWidget = prefs[Keys.widgetStyle(widgetId)],
-                global = prefs[Keys.GLOBAL_STYLE],
-                fallback = Style.MATERIAL_YOU.name
-            )),
+            theme = Themes.find(
+                SettingsResolver.resolveString(
+                    perWidget = prefs[Keys.widgetStyle(widgetId)],
+                    global = prefs[Keys.GLOBAL_STYLE],
+                    fallback = Themes.DEFAULT_ID
+                ),
+                Themes.parseCustom(prefs[Keys.CUSTOM_THEMES])
+            ),
             appActionsMode = AppActionsMode.valueOf(SettingsResolver.resolveString(
                 perWidget = prefs[Keys.widgetActionsMode(widgetId)],
                 global = prefs[Keys.GLOBAL_ACTIONS_MODE],
@@ -133,7 +137,23 @@ class SettingsRepo(private val ctx: Context) {
     suspend fun writeGlobalRemember(v: Boolean) = ctx.dataStore.edit { it[Keys.GLOBAL_REMEMBER] = v }
     suspend fun writeAppVisible(pkg: String, visible: Boolean) = ctx.dataStore.edit { it[Keys.appVisible(pkg)] = visible }
 
-    suspend fun writeGlobalStyle(s: Style) = ctx.dataStore.edit { it[Keys.GLOBAL_STYLE] = s.name }
+    suspend fun writeGlobalStyle(themeId: String) = ctx.dataStore.edit { it[Keys.GLOBAL_STYLE] = themeId }
+
+    suspend fun readCustomThemes(): List<Theme> =
+        Themes.parseCustom(ctx.dataStore.data.first()[Keys.CUSTOM_THEMES])
+
+    /** Legt einen eigenen Stil an oder ersetzt den mit derselben Kennung. */
+    suspend fun saveCustomTheme(theme: Theme) = ctx.dataStore.edit {
+        val old = Themes.parseCustom(it[Keys.CUSTOM_THEMES])
+        val new = if (old.any { t -> t.id == theme.id }) old.map { t -> if (t.id == theme.id) theme else t }
+            else old + theme
+        it[Keys.CUSTOM_THEMES] = Themes.encodeCustom(new)
+    }
+
+    /** Widgets, die den Stil nutzten, fallen über [Themes.find] auf die Standardvorlage zurück. */
+    suspend fun deleteCustomTheme(id: String) = ctx.dataStore.edit {
+        it[Keys.CUSTOM_THEMES] = Themes.encodeCustom(Themes.parseCustom(it[Keys.CUSTOM_THEMES]).filter { t -> t.id != id })
+    }
     suspend fun writeGlobalActionsMode(m: AppActionsMode) = ctx.dataStore.edit { it[Keys.GLOBAL_ACTIONS_MODE] = m.name }
     suspend fun writeGlobalActionsRaw(v: Boolean) = ctx.dataStore.edit { it[Keys.GLOBAL_ACTIONS_RAW] = v }
     suspend fun writeGlobalProgress(v: Boolean) = ctx.dataStore.edit { it[Keys.GLOBAL_PROGRESS] = v }
@@ -142,8 +162,8 @@ class SettingsRepo(private val ctx: Context) {
         if (pkg == null) it.remove(Keys.GLOBAL_PREFERRED_APP) else it[Keys.GLOBAL_PREFERRED_APP] = pkg
     }
 
-    suspend fun writeWidgetStyle(id: Int, s: Style?) = ctx.dataStore.edit {
-        if (s == null) it.remove(Keys.widgetStyle(id)) else it[Keys.widgetStyle(id)] = s.name
+    suspend fun writeWidgetStyle(id: Int, themeId: String?) = ctx.dataStore.edit {
+        if (themeId == null) it.remove(Keys.widgetStyle(id)) else it[Keys.widgetStyle(id)] = themeId
     }
     suspend fun writeWidgetActionsMode(id: Int, m: AppActionsMode?) = ctx.dataStore.edit {
         if (m == null) it.remove(Keys.widgetActionsMode(id)) else it[Keys.widgetActionsMode(id)] = m.name

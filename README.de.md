@@ -14,6 +14,7 @@ Android-Homescreen-Widget für die aktuell laufende Wiedergabe **beliebiger Medi
 - **Anruf-Apps bleiben draussen:** Teams, Meet, Zoom und die Telefon-App werden ignoriert; pro App einstellbar
 
 - **Adaptiv:** HxW 1x3 (mini bar) bis 4x5 (volle Karte) — 5 Layout-Buckets passen sich automatisch der gewählten Größe an
+- **Vorlagen für verbreitete Oberflächen** (Pixel, OnePlus/OPPO, Samsung, Xiaomi, Nothing) und ein **Stil-Editor** mit Live-Vorschau für eigene Stile (Farben, Deckkraft, Eckenradius, Unschärfe)
 - **Stil «OxygenOS»** zusätzlich, passend zu den System-Widgets von OnePlus/OPPO; App-Oberfläche im Stil der Systemeinstellungen
 - **3 weitere Themes:** Material You (tonal aus Wallpaper) · Glass (blurred backdrop) · AMOLED (pure black)
 - **Auto-Update:** Track-Wechsel in einer Media-App aktualisiert das Widget innerhalb ~100ms ohne User-Interaktion

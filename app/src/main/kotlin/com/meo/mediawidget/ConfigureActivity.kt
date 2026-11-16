@@ -60,15 +60,17 @@ class ConfigureActivity : Activity() {
             val (own, global) = withContext(Dispatchers.IO) {
                 repo.readWidgetOverrides(widgetId) to repo.readGlobalConfig()
             }
+            val themes = Themes.builtIn + withContext(Dispatchers.IO) { repo.readCustomThemes() }
             list.removeAllViews()
             list.addView(ui.title(getString(R.string.configure_title)))
             list.addView(ui.section(getString(R.string.widget_label_fmt, widgetId)))
             list.addView(ui.card {
                 choiceRow(
                     this, R.string.setting_style, null,
-                    options = Style.entries.map { it.label }, own = own.style?.ordinal,
-                    globalLabel = global.style.label
-                ) { repo.writeWidgetStyle(widgetId, it?.let { i -> Style.entries[i] }) }
+                    options = themes.map { it.name },
+                    own = own.themeId?.let { id -> themes.indexOfFirst { it.id == id }.takeIf { it >= 0 } },
+                    globalLabel = global.theme.name
+                ) { repo.writeWidgetStyle(widgetId, it?.let { i -> themes[i].id }) }
 
                 choiceRow(
                     this, R.string.setting_actions_mode, null,

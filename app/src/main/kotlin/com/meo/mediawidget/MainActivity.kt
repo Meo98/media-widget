@@ -60,10 +60,12 @@ class MainActivity : Activity() {
             val overridden = withContext(Dispatchers.IO) {
                 WidgetIds.all(this@MainActivity).associateWith { repo.readWidgetOverrides(it) != WidgetOverrides() }
             }
+            val custom = withContext(Dispatchers.IO) { repo.readCustomThemes() }
             list.removeAllViews()
             list.addView(ui.title(getString(R.string.app_name)))
             addAccess()
-            addDefaults(config)
+            addDefaults(config, Themes.builtIn + custom)
+            addCustomStyles(custom)
             addApps(config)
             addWidgets(overridden)
         }
@@ -83,12 +85,12 @@ class MainActivity : Activity() {
         if (!on) list.addView(ui.footnote(getString(R.string.permission_explain)))
     }
 
-    private fun addDefaults(config: WidgetConfig) {
+    private fun addDefaults(config: WidgetConfig, themes: List<Theme>) {
         list.addView(ui.section(getString(R.string.global_defaults)))
         list.addView(ui.card {
-            row(getString(R.string.setting_style), end = ui.value(config.style.label), chevron = true) {
-                choose(R.string.setting_style, Style.entries.map { it.label }, config.style.ordinal) {
-                    save { repo.writeGlobalStyle(Style.entries[it]) }
+            row(getString(R.string.setting_style), end = ui.value(config.theme.name), chevron = true) {
+                choose(R.string.setting_style, themes.map { it.name }, themes.indexOfFirst { it.id == config.theme.id }) {
+                    save { repo.writeGlobalStyle(themes[it].id) }
                 }
             }
             row(
@@ -114,6 +116,23 @@ class MainActivity : Activity() {
             }
         })
         list.addView(ui.footnote(getString(R.string.global_defaults_subtitle)))
+    }
+
+    /** Eigene Stile des Users und der Einstieg in den Editor. */
+    private fun addCustomStyles(custom: List<Theme>) {
+        list.addView(ui.section(getString(R.string.custom_styles)))
+        list.addView(ui.card {
+            for (theme in custom) {
+                row(theme.name, chevron = true) { openEditor(theme.id) }
+            }
+            row(getString(R.string.new_style), getString(R.string.new_style_help), chevron = true) { openEditor(null) }
+        })
+    }
+
+    private fun openEditor(themeId: String?) {
+        startActivity(
+            Intent(this, ThemeEditorActivity::class.java).putExtra(ThemeEditorActivity.EXTRA_THEME_ID, themeId)
+        )
     }
 
     /** Zeile mit Schalter; ein Tipp auf die ganze Zeile schaltet um. */

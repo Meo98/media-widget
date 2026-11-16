@@ -22,9 +22,12 @@ No account, no ads, no internet permission. *[Deutsch](README.de.md)*
   during calls. The widget ignores them, and you decide per app what may appear.
 - **Five layouts, one widget.** Resize it from a 1×3 bar to a 4×5 card and the
   layout follows.
-- **Four styles.** Material You (colours from your wallpaper), Glass (blurred
-  cover), AMOLED (pure black) and OxygenOS (matches OnePlus/OPPO system widgets).
-  Set a default and override it per widget.
+- **Styles for your phone.** Built-in looks for Pixel (Material You), OnePlus/OPPO
+  (OxygenOS), Samsung (One UI), Xiaomi (HyperOS) and Nothing OS, plus Glass and
+  AMOLED. Set a default and override it per widget.
+- **Make your own style.** An editor with live preview lets you pick colours,
+  background opacity, corner radius and a blurred cover backdrop, and save it
+  under your own name.
 - **Feels like a system app.** The settings follow your phone's own look, and the
   APK is 8 MB with no third-party UI libraries.
 - **App actions.** Like, thumbs up, shuffle, repeat, skip 30 s and other actions the
