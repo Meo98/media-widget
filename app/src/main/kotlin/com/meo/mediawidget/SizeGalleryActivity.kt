@@ -32,17 +32,26 @@ class SizeGalleryActivity : Activity() {
         val list = ui.page(this)
         list.addView(ui.title(getString(R.string.size_gallery)))
 
+        // Für Bildschirmfotos (per adb): --ez demo true zeigt Beispielinhalt,
+        // --es theme <Kennung> einen bestimmten Stil, --ez styles true alle Stile in einer Grösse,
+        // --ei w <dp> --ei h <dp> eine einzelne Grösse.
+        val demo = intent?.getBooleanExtra("demo", false) ?: false
+        val themeId = intent?.getStringExtra("theme")
+        val allStyles = intent?.getBooleanExtra("styles", false) ?: false
+
         scope.launch {
-            val config = withContext(Dispatchers.IO) { SettingsRepo(this@SizeGalleryActivity).readGlobalConfig() }
+            val repo = SettingsRepo(this@SizeGalleryActivity)
+            val global = withContext(Dispatchers.IO) { repo.readGlobalConfig() }
+            val themes = Themes.builtIn + withContext(Dispatchers.IO) { repo.readCustomThemes() }
             val provider = MediaWidgetProvider()
-            for (h in HEIGHTS) for (w in WIDTHS) {
-                val bucket = Bucket.pickForSize(android.util.SizeF(w.toFloat(), h.toFloat()))
-                list.addView(ui.section("$w × $h dp · ${bucket.name}"))
+
+            fun show(label: String, config: WidgetConfig, w: Int, h: Int) {
+                list.addView(ui.section(label))
                 val widget = FrameLayout(this@SizeGalleryActivity)
                 try {
                     val rv = provider.render(
                         this@SizeGalleryActivity, config, w.toFloat(), h.toFloat(),
-                        AppWidgetManager.INVALID_APPWIDGET_ID
+                        AppWidgetManager.INVALID_APPWIDGET_ID, demo
                     )
                     widget.addView(rv.apply(applicationContext, widget))
                 } catch (t: Throwable) {
@@ -60,6 +69,21 @@ class SizeGalleryActivity : Activity() {
                         leftMargin = ui.dp(8); rightMargin = ui.dp(8)
                     }
                 })
+            }
+
+            val config = themeId?.let { global.copy(theme = Themes.find(it, themes)) } ?: global
+            val oneW = intent?.getIntExtra("w", 0) ?: 0
+            val oneH = intent?.getIntExtra("h", 0) ?: 0
+            if (oneW > 0 && oneH > 0) {
+                // Eine einzelne Grösse: --ei w 326 --ei h 179
+                show(config.theme.name, config, oneW, oneH)
+            } else if (allStyles) {
+                for (t in themes) show(t.name, global.copy(theme = t), 326, 179)
+            } else {
+                for (h in HEIGHTS) for (w in WIDTHS) {
+                    val bucket = Bucket.pickForSize(android.util.SizeF(w.toFloat(), h.toFloat()))
+                    show("$w × $h dp · ${bucket.name}", config, w, h)
+                }
             }
         }
     }

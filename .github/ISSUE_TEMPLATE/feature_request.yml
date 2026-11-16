@@ -1,0 +1,16 @@
+name: Idea or style request
+description: A feature, a style for your phone's skin, a translation
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: Describe what you want to do with the widget. For a style request, name the phone or skin and add a screenshot of a system widget if you can.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why?
+      description: What is missing or annoying today?

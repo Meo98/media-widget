@@ -1,0 +1,34 @@
+name: Bug report
+description: Something does not work or looks wrong
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead? A screenshot helps for layout problems.
+    validations:
+      required: true
+  - type: input
+    id: phone
+    attributes:
+      label: Phone and Android version
+      placeholder: OnePlus 13, Android 15, stock launcher
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: Media app
+      placeholder: Spotify, playing
+  - type: input
+    id: version
+    attributes:
+      label: Media Widget version
+      placeholder: 0.4.0
+  - type: textarea
+    id: log
+    attributes:
+      label: Debug log (optional)
+      description: "Run `adb shell setprop log.tag.MediaWidget DEBUG`, reproduce, then paste the output of `adb logcat -d -s MediaWidget`."
+      render: text

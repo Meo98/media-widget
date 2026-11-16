@@ -162,6 +162,13 @@ open class MediaWidgetProvider : AppWidgetProvider() {
         manager.updateAppWidget(id, render(ctx, config, w, h, id))
     }
 
+    private fun demoCover(ctx: Context): Bitmap? = try {
+        val d = ctx.getDrawable(R.drawable.preview_cover)!!
+        Bitmap.createBitmap(384, 384, Bitmap.Config.ARGB_8888).also {
+            d.setBounds(0, 0, 384, 384); d.draw(android.graphics.Canvas(it))
+        }
+    } catch (_: Throwable) { null }
+
     /**
      * Setzt das Cover quadratisch und so gross, wie die Stufe Platz lässt.
      * In kleinen Hochformaten fallen App-Icons, Aktionen und Fortschritt weg,
@@ -201,8 +208,18 @@ open class MediaWidgetProvider : AppWidgetProvider() {
      * Baut das Widget für eine Grösse in dp. Auch die Grössen-Übersicht in der
      * App ruft das auf, damit sie exakt zeigt, was der Launcher bekäme.
      */
-    fun render(ctx: Context, config: WidgetConfig, w: Float, h: Float, id: Int): RemoteViews {
-        val shown = resolve(ctx, config)
+    fun render(
+        ctx: Context, config: WidgetConfig, w: Float, h: Float, id: Int, demo: Boolean = false
+    ): RemoteViews {
+        // demo: Beispielinhalt statt der echten Wiedergabe, für Vorschau und Bildschirmfotos.
+        val shown = if (demo) Shown(
+            controller = null,
+            remembered = Remembered(
+                DEMO_PKG, ctx.getString(R.string.preview_title), ctx.getString(R.string.preview_artist),
+                positionMs = 95_000, durationMs = 240_000, playing = false, playingSince = 0, savedAt = 0
+            ),
+            sessions = emptyList(), memory = emptyList()
+        ) else resolve(ctx, config)
         val bucket = Bucket.pickForSize(SizeF(w, h))
         // Einschalten mit: adb shell setprop log.tag.MediaWidget DEBUG
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -227,7 +244,7 @@ open class MediaWidgetProvider : AppWidgetProvider() {
         val md = shown.controller?.metadata
         val art: Bitmap? = md?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
             ?: md?.getBitmap(MediaMetadata.METADATA_KEY_ART)
-            ?: shown.remembered?.let { MediaMemory.cover(ctx, it.pkg) }
+            ?: shown.remembered?.let { if (it.pkg == DEMO_PKG) demoCover(ctx) else MediaMemory.cover(ctx, it.pkg) }
 
         bindContent(ctx, rv, bucket, config, shown, art)
         config.theme.applyTo(ctx, rv, art)
@@ -486,6 +503,7 @@ open class MediaWidgetProvider : AppWidgetProvider() {
 
     companion object {
         private const val TAG = "MediaWidget"
+        private const val DEMO_PKG = "demo"
         private const val TALL_COMPACT_BELOW = 230f
         private const val TALL_ACTIONS_FROM = 330f
         const val ACTION_PLAY_PAUSE = "com.meo.mediawidget.ACTION_PLAY_PAUSE"
