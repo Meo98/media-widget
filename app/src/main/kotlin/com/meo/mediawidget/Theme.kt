@@ -34,7 +34,7 @@ data class Theme(
     /** Eckenradius in dp, oder [SYSTEM_RADIUS] für den Radius des Launchers. */
     val radiusDp: Int,
     val coverRadiusDp: Int,
-    /** Unscharfes Cover hinter dem Inhalt (nur grösste Widget-Stufe). */
+    /** Unscharfes Cover hinter dem Inhalt, in allen Widget-Grössen. */
     val blurBackdrop: Boolean = false,
     /** Material You: Farben kommen aus dem Hintergrundbild, [light]/[dark] sind nur Rückfall. */
     val dynamic: Boolean = false
@@ -59,15 +59,16 @@ data class Theme(
      * Färbt ein Widget-Layout ein. Fehlt eine View in dieser Layout-Stufe,
      * überspringt RemoteViews die Aktion beim Anwenden.
      */
-    fun applyTo(ctx: Context, rv: RemoteViews, art: Bitmap?, allowBackdrop: Boolean) {
+    fun applyTo(ctx: Context, rv: RemoteViews, art: Bitmap?) {
         val c = colors(ctx)
         rv.setInt(R.id.container, "setBackgroundColor", c.background)
-        if (radiusDp == SYSTEM_RADIUS) {
-            rv.setViewOutlinePreferredRadiusDimen(
-                R.id.container, android.R.dimen.system_app_widget_background_radius
-            )
-        } else {
-            rv.setViewOutlinePreferredRadius(R.id.container, radiusDp.toFloat(), TypedValue.COMPLEX_UNIT_DIP)
+        // Derselbe Radius für die Fläche und das unscharfe Bild dahinter.
+        for (id in intArrayOf(R.id.container, R.id.backdrop)) {
+            if (radiusDp == SYSTEM_RADIUS) {
+                rv.setViewOutlinePreferredRadiusDimen(id, android.R.dimen.system_app_widget_background_radius)
+            } else {
+                rv.setViewOutlinePreferredRadius(id, radiusDp.toFloat(), TypedValue.COMPLEX_UNIT_DIP)
+            }
         }
         rv.setInt(R.id.cover, "setBackgroundColor", c.cover)
         rv.setViewOutlinePreferredRadius(R.id.cover, coverRadiusDp.toFloat(), TypedValue.COMPLEX_UNIT_DIP)
@@ -78,7 +79,7 @@ data class Theme(
         rv.setInt(R.id.btn_prev, "setColorFilter", c.buttons)
         rv.setInt(R.id.btn_next, "setColorFilter", c.buttons)
 
-        if (blurBackdrop && allowBackdrop && art != null) {
+        if (blurBackdrop && art != null) {
             rv.setImageViewBitmap(R.id.backdrop, BlurHelper.blurForGlass(art, ctx))
             rv.setViewVisibility(R.id.backdrop, View.VISIBLE)
         } else {

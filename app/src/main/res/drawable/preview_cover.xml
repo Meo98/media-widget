@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Beispiel-Cover für die Vorschau in der Widget-Auswahl: Farbverlauf mit Note.
+     Quadratisch (size), damit adjustViewBounds eine quadratische Fläche ergibt. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <size android:width="96dp" android:height="96dp"/>
+            <gradient
+                android:angle="315"
+                android:startColor="#FF7E57C2"
+                android:centerColor="#FFFF7043"
+                android:endColor="#FFFFCA28"/>
+        </shape>
+    </item>
+    <item
+        android:drawable="@drawable/ic_music"
+        android:top="24dp" android:bottom="24dp"
+        android:left="24dp" android:right="24dp"/>
+</layer-list>

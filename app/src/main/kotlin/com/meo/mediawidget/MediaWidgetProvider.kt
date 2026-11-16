@@ -17,7 +17,7 @@ import android.view.View
 import android.widget.RemoteViews
 import kotlinx.coroutines.runBlocking
 
-class MediaWidgetProvider : AppWidgetProvider() {
+open class MediaWidgetProvider : AppWidgetProvider() {
 
     /**
      * Was ein Widget gerade zeigt: entweder eine lebende Session ([controller])
@@ -166,7 +166,14 @@ class MediaWidgetProvider : AppWidgetProvider() {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "render id=$id w=${w}dp h=${h}dp → bucket=$bucket app=${shown.pkg} live=${shown.controller != null}")
         }
-        manager.updateAppWidget(id, build(ctx, bucket, config, shown, id))
+        val rv = build(ctx, bucket, config, shown, id)
+        if (bucket == Bucket.MID_CARD || bucket == Bucket.MEGA) {
+            // Cover ist so hoch wie das Widget und quadratisch; bei schmalen Widgets
+            // deckeln wir die Breite, damit Text und Knöpfe Platz behalten.
+            val maxDp = minOf(h - 24f, w * 0.45f)
+            rv.setInt(R.id.cover, "setMaxWidth", (maxDp * ctx.resources.displayMetrics.density).toInt())
+        }
+        manager.updateAppWidget(id, rv)
     }
 
     private fun build(
@@ -186,7 +193,7 @@ class MediaWidgetProvider : AppWidgetProvider() {
             ?: shown.remembered?.let { MediaMemory.cover(ctx, it.pkg) }
 
         bindContent(ctx, rv, bucket, config, shown, art)
-        config.theme.applyTo(ctx, rv, art, allowBackdrop = bucket == Bucket.MEGA)
+        config.theme.applyTo(ctx, rv, art)
         bindAppActions(ctx, rv, bucket, config, shown.controller, widgetId)
         bindAppSwitchers(ctx, rv, bucket, shown, widgetId)
         bindClicks(ctx, rv, config, shown, widgetId)
@@ -226,10 +233,10 @@ class MediaWidgetProvider : AppWidgetProvider() {
         val playing = controller?.playbackState?.state == PlaybackState.STATE_PLAYING
         tryImageRes(rv, R.id.btn_play_pause, if (playing) R.drawable.ic_pause else R.drawable.ic_play)
 
-        // Fortschrittsbalken: nur in der grössten Stufe
+        // Fortschrittsbalken: in allen Stufen, deren Layout einen hat (ab Karte)
         val posMs = controller?.playbackState?.position ?: remembered?.positionMs ?: 0L
         val durMs = md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: remembered?.durationMs ?: 0L
-        if (bucket == Bucket.MEGA && config.showProgressBar && durMs > 0L) {
+        if (config.showProgressBar && durMs > 0L) {
             try {
                 // In Sekunden rechnen: Millisekunden sprengen Int bei langen Hörbüchern
                 val posSec = (posMs / 1000L).coerceIn(0L, Int.MAX_VALUE.toLong()).toInt()
@@ -285,7 +292,7 @@ class MediaWidgetProvider : AppWidgetProvider() {
         val slotIds = listOf(R.id.action_slot_1, R.id.action_slot_2, R.id.action_slot_3, R.id.action_slot_4)
         val maxSlots = when (bucket) {
             Bucket.MEGA -> 4
-            Bucket.WIDE -> 2
+            Bucket.WIDE -> 4
             Bucket.MID_CARD -> 2
             Bucket.BAR -> 1
             else -> 0
@@ -459,11 +466,20 @@ class MediaWidgetProvider : AppWidgetProvider() {
         fun requestUpdate(ctx: Context) {
             val app = ctx.applicationContext
             val manager = AppWidgetManager.getInstance(app)
-            val ids = manager.getAppWidgetIds(ComponentName(app, MediaWidgetProvider::class.java))
+            val ids = WidgetIds.all(app)
             if (ids.isNotEmpty()) MediaWidgetProvider().onUpdate(app, manager, ids)
         }
     }
 }
+
+/**
+ * Zusätzliche Einträge in der Widget-Auswahl. Sie unterscheiden sich nur in
+ * Startgrösse und Vorschaubild (siehe res/xml); danach lässt sich jedes Widget
+ * auf jede Grösse ziehen und verhält sich gleich.
+ */
+class MediaWidgetCardProvider : MediaWidgetProvider()
+
+class MediaWidgetLargeProvider : MediaWidgetProvider()
 
 private fun MediaMetadata.titleOrNull(): String? =
     (getString(MediaMetadata.METADATA_KEY_TITLE) ?: getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE))

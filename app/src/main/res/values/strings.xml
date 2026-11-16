@@ -72,6 +72,13 @@
     <string name="preview_title">Song title</string>
     <string name="preview_artist">Artist</string>
 
+    <string name="widget_bar_label">Media Widget · Bar</string>
+    <string name="widget_card_label">Media Widget · Card</string>
+    <string name="widget_large_label">Media Widget · Large</string>
+    <string name="widget_bar_desc">One row: cover, title and controls. Resize it freely afterwards.</string>
+    <string name="widget_card_desc">Two rows: cover on the left, title and controls beside it.</string>
+    <string name="widget_large_desc">Large cover with title and controls below.</string>
+
     <string name="apps_title">Apps</string>
     <string name="apps_subtitle">Choose which apps may appear on the widget. Call apps such as Teams are off by default.</string>
     <string name="apps_empty">No app seen yet. Play something and it will show up here.</string>

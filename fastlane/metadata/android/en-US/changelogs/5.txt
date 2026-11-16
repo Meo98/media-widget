@@ -1,3 +1,5 @@
 * New built-in styles: One UI (Samsung), HyperOS (Xiaomi), Nothing OS
 * Style editor with live preview: make your own style with colours, opacity, corner radius and blurred backdrop
 * Widgets follow light/dark mode changes immediately
+* Three entries in the widget picker (bar, card, large), each with a preview
+* Larger sizes redesigned: square cover, card layout for two rows, blurred backdrop in every size

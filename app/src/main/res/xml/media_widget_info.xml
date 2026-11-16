@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Eintrag "Leiste": startet eine Zeile hoch, lässt sich auf jede Grösse ziehen. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="210dp"
-    android:minHeight="70dp"
-    android:targetCellWidth="5"
-    android:targetCellHeight="4"
+    android:minWidth="250dp"
+    android:minHeight="40dp"
+    android:minResizeWidth="180dp"
+    android:minResizeHeight="40dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="1"
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/widget_bar"
-    android:previewLayout="@layout/widget_mega"
+    android:previewLayout="@layout/preview_bar"
+    android:description="@string/widget_bar_desc"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:configure="com.meo.mediawidget.ConfigureActivity"/>

@@ -150,7 +150,7 @@ class ThemeEditorActivity : Activity() {
         val rv = RemoteViews(packageName, R.layout.widget_bar)
         rv.setTextViewText(R.id.title, getString(R.string.preview_title))
         rv.setTextViewText(R.id.artist, getString(R.string.preview_artist))
-        theme.applyTo(this, rv, art = null, allowBackdrop = false)
+        theme.applyTo(this, rv, art = null)
         preview.removeAllViews()
         try {
             preview.addView(rv.apply(applicationContext, preview))

@@ -1,114 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Erzeugt aus einer gemeinsamen Beschreibung; alle Stufen haben dieselben View-Ids. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
+    <ImageView
+        android:id="@+id/backdrop"
+        android:clipToOutline="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:importantForAccessibility="no"/>
     <LinearLayout
         android:id="@+id/container"
         android:clipToOutline="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="12dp"
         android:background="@drawable/widget_background">
-
         <ImageView
-            android:id="@+id/cover"
+        android:id="@+id/cover"
         android:clipToOutline="true"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:scaleType="centerCrop"
-            android:background="@drawable/widget_cover_background"
-            android:src="@drawable/ic_music"
-            android:contentDescription="@string/cover_desc"/>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:orientation="vertical"
-            android:layout_marginStart="10dp">
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:text="@string/idle_title"/>
-            <TextView
-                android:id="@+id/artist"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:text="@string/idle_artist"/>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <ImageButton
-                    android:id="@+id/btn_prev"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_prev"
-                    android:contentDescription="@string/prev_desc"/>
-                <ImageButton
-                    android:id="@+id/btn_play_pause"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="6dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_play"
-                    android:contentDescription="@string/play_pause_desc"/>
-                <ImageButton
-                    android:id="@+id/btn_next"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_marginStart="6dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_next"
-                    android:contentDescription="@string/next_desc"/>
-
-                <ImageButton
-                    android:id="@+id/action_slot_1"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginStart="10dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_heart"
-                    android:visibility="gone"
-                    android:contentDescription="@string/action_slot_desc"/>
-                <ImageButton
-                    android:id="@+id/action_slot_2"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginStart="4dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_heart"
-                    android:visibility="gone"
-                    android:contentDescription="@string/action_slot_desc"/>
-            </LinearLayout>
-        </LinearLayout>
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scaleType="centerCrop"
+        android:background="@drawable/widget_cover_background"
+        android:src="@drawable/ic_music"
+        android:contentDescription="@string/cover_desc"/><FrameLayout android:layout_width="match_parent" android:layout_height="8dp"/><TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:gravity="center_horizontal"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:text="@string/idle_title"/><TextView
+        android:id="@+id/artist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:gravity="center_horizontal"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:text="@string/idle_artist"/><LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageButton
+        android:id="@+id/btn_prev"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_prev"
+        android:contentDescription="@string/prev_desc"/>
+<ImageButton
+        android:id="@+id/btn_play_pause"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="8dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_play"
+        android:contentDescription="@string/play_pause_desc"/>
+<ImageButton
+        android:id="@+id/btn_next"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_next"
+        android:contentDescription="@string/next_desc"/>
+    </LinearLayout><LinearLayout
+        android:id="@+id/actions_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:orientation="horizontal">
+        <ImageButton
+        android:id="@+id/action_slot_1"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_heart"
+        android:visibility="gone"
+        android:contentDescription="@string/action_slot_desc"/>
+<ImageButton
+        android:id="@+id/action_slot_2"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="6dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_heart"
+        android:visibility="gone"
+        android:contentDescription="@string/action_slot_desc"/>
+<ImageButton
+        android:id="@+id/action_slot_3"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="6dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_heart"
+        android:visibility="gone"
+        android:contentDescription="@string/action_slot_desc"/>
+<ImageButton
+        android:id="@+id/action_slot_4"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="6dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_heart"
+        android:visibility="gone"
+        android:contentDescription="@string/action_slot_desc"/>
+    </LinearLayout><ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginTop="8dp"
+        android:max="100"
+        android:progress="0"
+        android:visibility="gone"/>
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/app_switcher_row"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_margin="6dp"
+        android:layout_margin="8dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:visibility="gone">
@@ -119,7 +145,7 @@
             android:scaleType="fitCenter"
             android:visibility="gone"
             android:contentDescription="@string/app_switcher_desc"/>
-        <ImageView
+<ImageView
             android:id="@+id/app_switcher_2"
             android:layout_width="22dp"
             android:layout_height="22dp"
@@ -127,7 +153,7 @@
             android:scaleType="fitCenter"
             android:visibility="gone"
             android:contentDescription="@string/app_switcher_desc"/>
-        <ImageView
+<ImageView
             android:id="@+id/app_switcher_3"
             android:layout_width="22dp"
             android:layout_height="22dp"

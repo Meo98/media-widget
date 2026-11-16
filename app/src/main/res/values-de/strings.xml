@@ -73,6 +73,13 @@
     <string name="preview_title">Songtitel</string>
     <string name="preview_artist">Interpret</string>
 
+    <string name="widget_bar_label">Media Widget · Leiste</string>
+    <string name="widget_card_label">Media Widget · Karte</string>
+    <string name="widget_large_label">Media Widget · Gross</string>
+    <string name="widget_bar_desc">Eine Zeile: Cover, Titel und Knöpfe. Danach frei in der Grösse ziehbar.</string>
+    <string name="widget_card_desc">Zwei Zeilen: Cover links, Titel und Knöpfe daneben.</string>
+    <string name="widget_large_desc">Grosses Cover, darunter Titel und Knöpfe.</string>
+
     <string name="apps_title">Apps</string>
     <string name="apps_subtitle">Welche Apps im Widget erscheinen dürfen. Anruf-Apps wie Teams sind von Haus aus ausgeschaltet.</string>
     <string name="apps_empty">Noch keine App gesehen. Spiele etwas ab, dann erscheint sie hier.</string>
