@@ -39,8 +39,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # Kein eigener SDK-Schritt: ubuntu-latest bringt das Android-SDK samt
+      # akzeptierten Lizenzen mit (ANDROID_HOME), fehlende Teile lädt Gradle nach.
+      # android-actions/setup-android@v3 scheitert am entfernten Paket "tools".
 
       - name: Cache Gradle
         uses: actions/cache@v4
