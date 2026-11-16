@@ -18,10 +18,10 @@ enum class Bucket {
             return when {
                 // Eine Zeile. Launcher melden dafür 70–90 dp, zwei Zeilen ab etwa 140 dp.
                 h < 110f -> if (w < 250f) MICRO_BAR else BAR
-                // Zwei Zeilen: Karte mit Cover links.
-                h < 200f -> MID_CARD
-                // Ab drei Zeilen entscheidet die Form: Querformat → Cover links, sonst Cover oben.
-                w >= h * 1.2f -> MEGA
+                // Zwei Zeilen: Karte mit Cover links; ist sie dafür zu schmal, Cover oben.
+                h < 200f -> if (w < 230f) WIDE else MID_CARD
+                // Ab drei Zeilen entscheidet die Form: klares Querformat → Cover links, sonst Cover oben.
+                w >= h * 1.3f -> MEGA
                 else -> WIDE
             }
         }

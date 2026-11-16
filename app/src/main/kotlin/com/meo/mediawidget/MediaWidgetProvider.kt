@@ -13,6 +13,7 @@ import android.media.session.PlaybackState
 import android.os.Bundle
 import android.util.Log
 import android.util.SizeF
+import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import kotlinx.coroutines.runBlocking
@@ -154,30 +155,66 @@ open class MediaWidgetProvider : AppWidgetProvider() {
 
     private fun renderInto(ctx: Context, manager: AppWidgetManager, id: Int) {
         val config = runBlocking { SettingsRepo(ctx).resolve(id) }
-        val shown = resolve(ctx, config)
-
-        // Tatsächliche Grösse aus den Optionen lesen (setzt der Launcher) und
-        // die Layout-Stufe selbst wählen.
+        // Tatsächliche Grösse aus den Optionen lesen; die setzt der Launcher.
         val opts = manager.getAppWidgetOptions(id)
         val w = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 210).toFloat()
         val h = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 70).toFloat()
+        manager.updateAppWidget(id, render(ctx, config, w, h, id))
+    }
+
+    /**
+     * Setzt das Cover quadratisch und so gross, wie die Stufe Platz lässt.
+     * In kleinen Hochformaten fallen App-Icons, Aktionen und Fortschritt weg,
+     * damit das Cover nicht zur Briefmarke wird.
+     */
+    private fun sizeCover(rv: RemoteViews, bucket: Bucket, w: Float, h: Float) {
+        val side = when (bucket) {
+            Bucket.MID_CARD -> minOf(h - 24f, w * 0.45f)
+            Bucket.MEGA -> minOf(h - 28f, w * 0.45f)
+            Bucket.WIDE -> {
+                val compact = h < TALL_COMPACT_BELOW
+                val showActions = h >= TALL_ACTIONS_FROM
+                if (compact) {
+                    rv.setViewVisibility(R.id.app_switcher_row, View.GONE)
+                    rv.setViewVisibility(R.id.progress, View.GONE)
+                }
+                if (!showActions) rv.setViewVisibility(R.id.actions_row, View.GONE)
+                // Höhe von Rand, Text und Knöpfen (und Aktionen, Fortschritt), gemessen am Layout
+                val chrome = (if (compact) 122f else 134f) + (if (showActions) 40f else 0f)
+                val fit = minOf(w - 24f, h - chrome)
+                // Füllt das Cover die ganze Breite, lägen die App-Icons in der Ecke darauf:
+                // dann das Cover etwas kleiner, sodass sie darüber Platz haben.
+                if (!compact && w - 24f - fit < 56f) fit - 40f else fit
+            }
+            else -> return
+        }
+        if (side < 40f) {
+            rv.setViewVisibility(R.id.cover, View.GONE)
+        } else {
+            rv.setViewVisibility(R.id.cover, View.VISIBLE)
+            rv.setViewLayoutWidth(R.id.cover, side, TypedValue.COMPLEX_UNIT_DIP)
+            rv.setViewLayoutHeight(R.id.cover, side, TypedValue.COMPLEX_UNIT_DIP)
+        }
+    }
+
+    /**
+     * Baut das Widget für eine Grösse in dp. Auch die Grössen-Übersicht in der
+     * App ruft das auf, damit sie exakt zeigt, was der Launcher bekäme.
+     */
+    fun render(ctx: Context, config: WidgetConfig, w: Float, h: Float, id: Int): RemoteViews {
+        val shown = resolve(ctx, config)
         val bucket = Bucket.pickForSize(SizeF(w, h))
         // Einschalten mit: adb shell setprop log.tag.MediaWidget DEBUG
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "render id=$id w=${w}dp h=${h}dp → bucket=$bucket app=${shown.pkg} live=${shown.controller != null}")
         }
-        val rv = build(ctx, bucket, config, shown, id)
-        if (bucket == Bucket.MID_CARD || bucket == Bucket.MEGA) {
-            // Cover ist so hoch wie das Widget und quadratisch; bei schmalen Widgets
-            // deckeln wir die Breite, damit Text und Knöpfe Platz behalten.
-            val maxDp = minOf(h - 24f, w * 0.45f)
-            rv.setInt(R.id.cover, "setMaxWidth", (maxDp * ctx.resources.displayMetrics.density).toInt())
-        }
-        manager.updateAppWidget(id, rv)
+        val rv = build(ctx, bucket, config, shown, id, w)
+        sizeCover(rv, bucket, w, h)
+        return rv
     }
 
     private fun build(
-        ctx: Context, bucket: Bucket, config: WidgetConfig, shown: Shown, widgetId: Int
+        ctx: Context, bucket: Bucket, config: WidgetConfig, shown: Shown, widgetId: Int, widthDp: Float
     ): RemoteViews {
         val layoutId = when (bucket) {
             Bucket.MICRO_BAR -> R.layout.widget_microbar
@@ -194,7 +231,7 @@ open class MediaWidgetProvider : AppWidgetProvider() {
 
         bindContent(ctx, rv, bucket, config, shown, art)
         config.theme.applyTo(ctx, rv, art)
-        bindAppActions(ctx, rv, bucket, config, shown.controller, widgetId)
+        bindAppActions(ctx, rv, bucket, config, shown.controller, widgetId, widthDp)
         bindAppSwitchers(ctx, rv, bucket, shown, widgetId)
         bindClicks(ctx, rv, config, shown, widgetId)
         return rv
@@ -287,13 +324,14 @@ open class MediaWidgetProvider : AppWidgetProvider() {
 
     private fun bindAppActions(
         ctx: Context, rv: RemoteViews, bucket: Bucket,
-        config: WidgetConfig, controller: MediaController?, widgetId: Int
+        config: WidgetConfig, controller: MediaController?, widgetId: Int, widthDp: Float
     ) {
         val slotIds = listOf(R.id.action_slot_1, R.id.action_slot_2, R.id.action_slot_3, R.id.action_slot_4)
+        // Wie viele App-Aktionen Platz haben, hängt von der Breite neben dem Cover ab.
         val maxSlots = when (bucket) {
-            Bucket.MEGA -> 4
-            Bucket.WIDE -> 4
-            Bucket.MID_CARD -> 2
+            Bucket.MEGA -> if (widthDp >= 380f) 4 else 2
+            Bucket.WIDE -> if (widthDp >= 240f) 4 else 2
+            Bucket.MID_CARD -> if (widthDp >= 320f) 2 else 0
             Bucket.BAR -> 1
             else -> 0
         }
@@ -448,6 +486,8 @@ open class MediaWidgetProvider : AppWidgetProvider() {
 
     companion object {
         private const val TAG = "MediaWidget"
+        private const val TALL_COMPACT_BELOW = 230f
+        private const val TALL_ACTIONS_FROM = 330f
         const val ACTION_PLAY_PAUSE = "com.meo.mediawidget.ACTION_PLAY_PAUSE"
         const val ACTION_NEXT = "com.meo.mediawidget.ACTION_NEXT"
         const val ACTION_PREV = "com.meo.mediawidget.ACTION_PREV"

@@ -14,7 +14,7 @@ class BucketTest {
     @Test fun `HxW 1x3 picks MICRO_BAR`() = assertEquals(Bucket.MICRO_BAR, Bucket.pickForSize(size(210f, 70f)))
     @Test fun `HxW 1x4 picks BAR`() = assertEquals(Bucket.BAR, Bucket.pickForSize(size(290f, 70f)))
     @Test fun `HxW 1x5 picks BAR`() = assertEquals(Bucket.BAR, Bucket.pickForSize(size(370f, 70f)))
-    @Test fun `HxW 2x3 picks MID_CARD`() = assertEquals(Bucket.MID_CARD, Bucket.pickForSize(size(210f, 140f)))
+    @Test fun `HxW 2x3 is too narrow for a card and picks WIDE`() = assertEquals(Bucket.WIDE, Bucket.pickForSize(size(210f, 140f)))
     @Test fun `HxW 2x5 picks MID_CARD`() = assertEquals(Bucket.MID_CARD, Bucket.pickForSize(size(370f, 140f)))
     @Test fun `HxW 3x3 picks WIDE`() = assertEquals(Bucket.WIDE, Bucket.pickForSize(size(210f, 210f)))
     @Test fun `HxW 3x5 picks MEGA`() = assertEquals(Bucket.MEGA, Bucket.pickForSize(size(370f, 210f)))
@@ -22,5 +22,6 @@ class BucketTest {
     @Test fun `OnePlus 2x4 picks MID_CARD`() = assertEquals(Bucket.MID_CARD, Bucket.pickForSize(size(326f, 159f)))
     @Test fun `HxW 4x3 picks WIDE`() = assertEquals(Bucket.WIDE, Bucket.pickForSize(size(210f, 290f)))
     @Test fun `HxW 4x4 picks WIDE`() = assertEquals(Bucket.WIDE, Bucket.pickForSize(size(290f, 290f)))
-    @Test fun `HxW 4x5 picks MEGA`() = assertEquals(Bucket.MEGA, Bucket.pickForSize(size(370f, 290f)))
+    @Test fun `HxW 4x5 is nearly square and picks WIDE`() = assertEquals(Bucket.WIDE, Bucket.pickForSize(size(370f, 290f)))
+    @Test fun `clear landscape picks MEGA`() = assertEquals(Bucket.MEGA, Bucket.pickForSize(size(408f, 282f)))
 }

@@ -3,3 +3,4 @@
 * Widgets follow light/dark mode changes immediately
 * Three entries in the widget picker (bar, card, large), each with a preview
 * Larger sizes redesigned: square cover, card layout for two rows, blurred backdrop in every size
+* "Preview all sizes" page in the app shows the widget in twelve sizes with your style

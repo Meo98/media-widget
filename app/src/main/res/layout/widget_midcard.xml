@@ -22,9 +22,9 @@
         <ImageView
         android:id="@+id/cover"
         android:clipToOutline="true"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:adjustViewBounds="true"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_gravity="center_vertical"
         android:scaleType="centerCrop"
         android:background="@drawable/widget_cover_background"
         android:src="@drawable/ic_music"
@@ -49,76 +49,17 @@
         android:textSize="13sp"
         android:singleLine="true"
         android:ellipsize="end"
-        android:text="@string/idle_artist"/><FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/><LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-        <ImageButton
-        android:id="@+id/btn_prev"
-        android:layout_width="38dp"
-        android:layout_height="38dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_prev"
-        android:contentDescription="@string/prev_desc"/>
-<ImageButton
-        android:id="@+id/btn_play_pause"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_marginStart="6dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_play"
-        android:contentDescription="@string/play_pause_desc"/>
-<ImageButton
-        android:id="@+id/btn_next"
-        android:layout_width="38dp"
-        android:layout_height="38dp"
-        android:layout_marginStart="6dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_next"
-        android:contentDescription="@string/next_desc"/>
-    </LinearLayout><LinearLayout
-        android:id="@+id/actions_row"
-        android:layout_width="wrap_content"
+        android:text="@string/idle_artist"/><LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:gravity="center_vertical"
-        android:visibility="gone"
         android:orientation="horizontal">
-        <ImageButton
-        android:id="@+id/action_slot_1"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_heart"
-        android:visibility="gone"
-        android:contentDescription="@string/action_slot_desc"/>
-<ImageButton
-        android:id="@+id/action_slot_2"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="6dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_heart"
-        android:visibility="gone"
-        android:contentDescription="@string/action_slot_desc"/>
-    </LinearLayout><ProgressBar
-        android:id="@+id/progress"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_marginTop="8dp"
-        android:max="100"
-        android:progress="0"
-        android:visibility="gone"/>
-    </LinearLayout>
-    </LinearLayout>
-    <LinearLayout
+        <LinearLayout
         android:id="@+id/app_switcher_row"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_margin="8dp"
+        android:layout_marginStart="0dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:visibility="gone">
@@ -145,5 +86,69 @@
             android:scaleType="fitCenter"
             android:visibility="gone"
             android:contentDescription="@string/app_switcher_desc"/>
+    </LinearLayout><FrameLayout android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/><LinearLayout
+        android:id="@+id/actions_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:orientation="horizontal">
+        <ImageButton
+        android:id="@+id/action_slot_1"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_heart"
+        android:visibility="gone"
+        android:contentDescription="@string/action_slot_desc"/>
+<ImageButton
+        android:id="@+id/action_slot_2"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="4dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_heart"
+        android:visibility="gone"
+        android:contentDescription="@string/action_slot_desc"/>
+    </LinearLayout>
+    </LinearLayout><FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/><LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageButton
+        android:id="@+id/btn_prev"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="38dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_prev"
+        android:contentDescription="@string/prev_desc"/>
+<ImageButton
+        android:id="@+id/btn_play_pause"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="42dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_play"
+        android:contentDescription="@string/play_pause_desc"/>
+<ImageButton
+        android:id="@+id/btn_next"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="38dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_next"
+        android:contentDescription="@string/next_desc"/>
+    </LinearLayout><ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginTop="8dp"
+        android:max="100"
+        android:progress="0"
+        android:visibility="gone"/>
+    </LinearLayout>
     </LinearLayout>
 </FrameLayout>

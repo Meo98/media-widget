@@ -43,6 +43,12 @@
             </intent-filter>
         </activity>
 
+        <!-- Reine Ansicht ohne Eingaben; exportiert, damit sie sich zum Prüfen per adb öffnen lässt. -->
+        <activity
+            android:name=".SizeGalleryActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.DeviceDefault.DayNight"/>
+
         <activity
             android:name=".ThemeEditorActivity"
             android:exported="false"

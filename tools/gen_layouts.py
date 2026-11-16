@@ -5,10 +5,11 @@ out = sys.argv[1]
 NS = 'xmlns:android="http://schemas.android.com/apk/res/android"'
 BG = '?android:attr/selectableItemBackgroundBorderless'
 
-def btn(id_, src, size, desc, margin=0, gone=False, preview=False, tint=None):
+def btn(id_, src, size, desc, margin=0, gone=False, preview=False, tint=None, weighted=False):
     idattr = '' if preview and id_.startswith('action') else f'android:id="@+id/{id_}"\n        '
+    width = '0dp"\n        android:layout_weight="1' if weighted else f'{size}dp'
     return f'''<ImageButton
-        {idattr}android:layout_width="{size}dp"
+        {idattr}android:layout_width="{width}"
         android:layout_height="{size}dp"
         {f'android:layout_marginStart="{margin}dp"' if margin else ''}
         android:background="{BG}"
@@ -17,13 +18,15 @@ def btn(id_, src, size, desc, margin=0, gone=False, preview=False, tint=None):
         {'android:visibility="gone"' if gone else ''}
         android:contentDescription="@string/{desc}"/>'''
 
-def transport(sizes, gap, p):
+def transport(sizes, gap, p, weighted=False):
+    """weighted: die drei Knöpfe teilen sich die Breite und werden nie abgeschnitten."""
     t = '@color/material_button_tint' if p else None
     s, b = sizes
+    g = 0 if weighted else gap
     return '\n'.join([
-        btn('btn_prev', 'ic_prev', s, 'prev_desc', preview=p, tint=t),
-        btn('btn_play_pause', 'ic_play', b, 'play_pause_desc', gap, preview=p, tint=t),
-        btn('btn_next', 'ic_next', s, 'next_desc', gap, preview=p, tint=t)])
+        btn('btn_prev', 'ic_prev', s, 'prev_desc', preview=p, tint=t, weighted=weighted),
+        btn('btn_play_pause', 'ic_play', b, 'play_pause_desc', g, preview=p, tint=t, weighted=weighted),
+        btn('btn_next', 'ic_next', s, 'next_desc', g, preview=p, tint=t, weighted=weighted)])
 
 def actions(n, size, gap, first_margin=0):
     return '\n'.join(btn(f'action_slot_{i}', 'ic_heart', size, 'action_slot_desc',
@@ -57,9 +60,12 @@ def cover(w, h, p, extra=''):
         android:src="@drawable/{'preview_cover' if p else 'ic_music'}"
         android:contentDescription="@string/cover_desc"/>'''
 
-SQUARE = 'android:adjustViewBounds="true"'
+# Grösse des Covers setzt der Code (MediaWidgetProvider.render); die Werte hier gelten nur
+# für die Vorschau in der Widget-Auswahl.
+VCENTER = 'android:layout_gravity="center_vertical"'
+HCENTER = 'android:layout_gravity="center_horizontal"'
 
-def switcher(size, inline=False):
+def switcher(size, inline=False, margin=8):
     icons = '\n'.join(f'''<ImageView
             android:id="@+id/app_switcher_{i}"
             android:layout_width="{size}dp"
@@ -68,7 +74,7 @@ def switcher(size, inline=False):
             android:scaleType="fitCenter"
             android:visibility="gone"
             android:contentDescription="@string/app_switcher_desc"/>''' for i in (1, 2, 3))
-    pos = 'android:layout_marginStart="8dp"' if inline else 'android:layout_gravity="top|end"\n        android:layout_margin="8dp"'
+    pos = f'android:layout_marginStart="{margin}dp"' if inline else 'android:layout_gravity="top|end"\n        android:layout_margin="8dp"'
     return f'''<LinearLayout
         android:id="@+id/app_switcher_row"
         android:layout_width="wrap_content"
@@ -89,6 +95,7 @@ PROGRESS = '''<ProgressBar
         android:max="100"
         android:progress="0"
         android:visibility="gone"/>'''
+HSPACER = '<FrameLayout android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>'
 SPACER = '<FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/>'
 
 def root(orientation, padding, body, overlay='', gravity=''):
@@ -130,10 +137,10 @@ def column(body, margin):
         {body}
     </LinearLayout>'''
 
-def row(body, top=0, center=False, id_=None, gone=False):
+def row(body, top=0, center=False, id_=None, gone=False, full=False):
     return f'''<LinearLayout
         {f'android:id="@+id/{id_}"' if id_ else ''}
-        android:layout_width="wrap_content"
+        android:layout_width="{'match_parent' if full else 'wrap_content'}"
         android:layout_height="wrap_content"
         {f'android:layout_marginTop="{top}dp"' if top else ''}
         {'android:layout_gravity="center_horizontal"' if center else ''}
@@ -168,21 +175,25 @@ def bar(p=False):
 
 def card(p, tsp, asp, sizes, n_actions, asize, pad):
     """Cover links (quadratisch, so hoch wie das Widget), rechts Text und Knöpfe."""
-    right = text('title', tsp, True, p) + text('artist', asp, False, p) + SPACER + row(transport(sizes, 6, p))
+    right = text('title', tsp, True, p) + text('artist', asp, False, p)
     if not p:
-        right += row(actions(n_actions, asize, 6), top=6, id_='actions_row', gone=True) + PROGRESS
-    return root('horizontal', pad, cover('wrap_content', 'match_parent', p, SQUARE) + column(right, pad),
-                overlay='' if p else switcher(22))
+        # Unter dem Text: App-Icons links, App-Aktionen rechts
+        right += row(switcher(22, inline=True, margin=0) + HSPACER +
+                     row(actions(n_actions, asize, 4), id_='actions_row', gone=True), top=6, full=True)
+    right += SPACER + row(transport(sizes, 6, p, weighted=True), full=True)
+    if not p:
+        right += PROGRESS
+    return root('horizontal', pad, cover('96dp', '96dp', p, VCENTER) + column(right, pad))
 
 def tall(p=False):
-    """Hochformat: Cover oben, darunter Text und Knöpfe."""
-    body = cover('match_parent', '0dp', p, 'android:layout_weight="1"') + \
+    """Hochformat: quadratisches Cover oben, darunter Text und Knöpfe. App-Icons liegen in der Ecke."""
+    body = cover('140dp', '140dp', p, HCENTER) + \
         '<FrameLayout android:layout_width="match_parent" android:layout_height="8dp"/>' + \
         text('title', 15, True, p, center=True) + text('artist', 13, False, p, center=True) + \
-        row(transport((40, 44), 8, p), top=6, center=True)
+        row(transport((40, 44), 8, p, weighted=True), top=6, full=True)
     if not p:
-        body += row(actions(4, 34, 6), top=4, center=True, id_='actions_row', gone=True) + PROGRESS
-    return root('vertical', 12, body, overlay='' if p else switcher(22))
+        body += row(actions(4, 34, 4), top=4, center=True, id_='actions_row', gone=True) + PROGRESS
+    return root('vertical', 12, body, overlay='' if p else switcher(22), gravity='android:gravity="center_vertical"')
 
 files = {
     'widget_microbar.xml': microbar(),

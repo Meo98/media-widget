@@ -22,9 +22,9 @@
         <ImageView
         android:id="@+id/cover"
         android:clipToOutline="true"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:adjustViewBounds="true"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_gravity="center_vertical"
         android:scaleType="centerCrop"
         android:background="@drawable/widget_cover_background"
         android:src="@drawable/preview_cover"
@@ -52,13 +52,14 @@
         android:singleLine="true"
         android:ellipsize="end"
         android:text="@string/preview_artist"/><FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/><LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal">
         <ImageButton
         android:id="@+id/btn_prev"
-        android:layout_width="38dp"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="38dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_prev"
@@ -66,18 +67,18 @@
         android:contentDescription="@string/prev_desc"/>
 <ImageButton
         android:id="@+id/btn_play_pause"
-        android:layout_width="42dp"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="42dp"
-        android:layout_marginStart="6dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_play"
         android:tint="@color/material_button_tint"
         android:contentDescription="@string/play_pause_desc"/>
 <ImageButton
         android:id="@+id/btn_next"
-        android:layout_width="38dp"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="38dp"
-        android:layout_marginStart="6dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_next"
         android:tint="@color/material_button_tint"

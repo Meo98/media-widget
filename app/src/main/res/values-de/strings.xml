@@ -80,6 +80,8 @@
     <string name="widget_card_desc">Zwei Zeilen: Cover links, Titel und Knöpfe daneben.</string>
     <string name="widget_large_desc">Grosses Cover, darunter Titel und Knöpfe.</string>
 
+    <string name="size_gallery">Alle Grössen ansehen</string>
+    <string name="size_gallery_help">Das Widget mit dem Standard-Stil und dem aktuellen Titel in jeder Grösse</string>
     <string name="apps_title">Apps</string>
     <string name="apps_subtitle">Welche Apps im Widget erscheinen dürfen. Anruf-Apps wie Teams sind von Haus aus ausgeschaltet.</string>
     <string name="apps_empty">Noch keine App gesehen. Spiele etwas ab, dann erscheint sie hier.</string>

@@ -127,6 +127,12 @@ class MainActivity : Activity() {
             }
             row(getString(R.string.new_style), getString(R.string.new_style_help), chevron = true) { openEditor(null) }
         })
+        list.addView(ui.footnote(""))
+        list.addView(ui.card {
+            row(getString(R.string.size_gallery), getString(R.string.size_gallery_help), chevron = true) {
+                startActivity(Intent(this@MainActivity, SizeGalleryActivity::class.java))
+            }
+        })
     }
 
     private fun openEditor(themeId: String?) {
